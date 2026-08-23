@@ -1,4 +1,4 @@
-const CACHE='driverscan-v4-barcode-added';
+const CACHE='driverscan-v5-two-barcodes';
 self.addEventListener('install',e=>{self.skipWaiting();});
 self.addEventListener('activate',e=>e.waitUntil(
   caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k)))).then(()=>self.clients.claim())

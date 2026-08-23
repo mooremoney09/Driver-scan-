@@ -52,7 +52,7 @@ video{width:100%;aspect-ratio:3/4;object-fit:cover;background:#000;border-radius
   <div class="row"><h1>Scan Items</h1><span class="pill" id="scanCount"></span></div>
   <div class="wrap"><video id="video" playsinline muted></video><div class="frame"></div></div>
   <div class="card">
-    <div id="status" class="muted">Tap Start Scanner, then allow camera access.</div><div class="muted" style="font-size:13px;margin-top:8px">Build: barcode 076737311597 enabled</div>
+    <div id="status" class="muted">Tap Start Scanner, then allow camera access.</div><div class="muted" style="font-size:13px;margin-top:8px">Build: barcodes 076737311597 + 027541010022 enabled</div>
     <div class="progress"><div id="bar"></div></div>
     <button id="start" class="btn">Start Scanner</button>
     <button id="stop" class="btn secondary">Stop</button>
@@ -84,6 +84,7 @@ const order={
   id:"ORD-10042",
   items:[
     {name:"Fresh Produce Item",barcode:"076737311597",qty:1,scanned:false},
+    {name:"Scanned Product",barcode:"027541010022",qty:1,scanned:false},
     {name:"Cheese Crackers",barcode:"024100210217",qty:1,scanned:false},
     {name:"Purified Water",barcode:"049000042566",qty:1,scanned:false}
   ]
