@@ -22,13 +22,10 @@ video{width:100%;aspect-ratio:3/4;object-fit:cover;background:#000;border-radius
 </head>
 <body>
 <div class="app">
-<section id="splash1" class="screen splash active"><img src="assets/opening.png" alt="Opening screen"></section>
-<section id="splash2" class="screen splash"><img src="assets/spark-driver.png" alt="Spark Driver screen"></section>
+<section id="splash1" class="screen splash active"><img src="opening.png" alt="Opening screen"></section>
+<section id="splash2" class="screen splash"><img src="spark-driver.png" alt="Spark Driver screen"></section>
 
-<section id="login" class="screen">
-  <div class="center" style="padding-top:60px"><div class="logoText">DriverScan</div><p class="muted">Order-aware scanning prototype</p></div>
-  <div class="card"><input id="email" class="input" type="email" placeholder="Email"><input id="password" class="input" type="password" placeholder="Password"><button class="btn" onclick="login()">Log In</button><p class="muted small">Prototype login: enter any non-empty email and password.</p></div>
-</section>
+
 
 <section id="home" class="screen">
   <div class="row"><div><h1>Welcome, Driver 👋</h1><div class="sub">Ready to verify this order?</div></div><span class="pill goodpill">● Online</span></div>
@@ -48,7 +45,7 @@ video{width:100%;aspect-ratio:3/4;object-fit:cover;background:#000;border-radius
 
 <section id="complete" class="screen"><div class="card center" style="margin-top:70px"><div class="doneBadge">✅</div><h1>Order Verified</h1><p>All items in this prototype order have been scanned and matched.</p><div class="statusBox"><b>PROTOTYPE CONFIRMATION</b><p class="muted small">This screen is for testing this app only. It is not an official Walmart, Spark, store checkout, payment, or exit pass.</p></div><button class="btn" onclick="resetOrder()">Start New Demo Order</button></div></section>
 
-<section id="profile" class="screen"><h1>Profile</h1><div class="card"><b>DriverScan Prototype</b><p class="muted">Barcode verification demo built around your working scanner.</p><p class="small muted">The app does not connect to Walmart or Spark systems and does not create official checkout or exit credentials.</p></div><button class="btn secondary" onclick="logout()">Log Out</button></section>
+<section id="profile" class="screen"><h1>Profile</h1><div class="card"><b>DriverScan Prototype</b><p class="muted">Barcode verification demo built around your working scanner.</p><p class="small muted">The app does not connect to Walmart or Spark systems and does not create official checkout or exit credentials.</p></div><button class="btn secondary" onclick="resetOrder()">Reset Demo Order</button></section>
 </div>
 
 <div id="nav" class="nav" style="display:none"><div class="navin"><button data-id="home" onclick="show('home')"><span class="ico">⌂</span>Home</button><button data-id="orders" onclick="show('orders')"><span class="ico">☷</span>Orders</button><button data-id="scan" onclick="show('scan')"><span class="ico">▣</span>Scan</button><button data-id="review" onclick="show('review')"><span class="ico">✓</span>Review</button><button data-id="profile" onclick="show('profile')"><span class="ico">◉</span>Profile</button></div></div>
@@ -66,12 +63,12 @@ function refresh(){const c=count(),n=order.items.length,p=(c/n)*100;scanCount.te
 function handleBarcode(code){code=(code||'').replace(/\D/g,'');const candidates=new Set([code]);if(code.length===13&&code.startsWith('0'))candidates.add(code.slice(1));if(code.length===11)candidates.add('0'+code);const item=order.items.find(x=>candidates.has(x.barcode));if(item){const was=item.scanned;item.scanned=true;statusEl.innerHTML=`<div class="result good"><b>${was?'Already scanned':'✓ Correct item found'}</b><br>${item.name}<br><span class="small">${code}</span></div>`;navigator.vibrate?.(100)}else{statusEl.innerHTML=`<div class="result bad"><b>⚠ Item needs review</b><br>Barcode not found in this order.<br><span class="small">${code}</span></div>`}refresh()}
 async function startScanner(){try{stopScanner();zxing=new ZXing.BrowserMultiFormatReader();statusEl.textContent='Starting rear camera…';await zxing.decodeFromConstraints({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}},video,(res,err)=>{if(res){handleBarcode(res.getText());stopScanner(false)}});statusEl.textContent='Camera ready. Center the barcode in the frame.'}catch(e){statusEl.innerHTML=`<span class="warn">Scanner error: ${e.message}</span>`}}
 function stopScanner(changeText=true){if(zxing){try{zxing.reset()}catch(e){}zxing=null}if(changeText&&statusEl)statusEl.textContent='Scanner stopped.'}
-function show(id){if(id!=='scan')stopScanner(false);document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');nav.style.display=(id==='login'||id==='complete')?'none':'block';document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.id===id));refresh();window.scrollTo(0,0)}
-function login(){if(email.value.trim()&&password.value.trim()){localStorage.setItem('driverscan-login','1');show('home')}}function logout(){localStorage.removeItem('driverscan-login');show('login')}
+function show(id){if(id!=='scan')stopScanner(false);document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');nav.style.display=(id==='complete')?'none':'block';document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.id===id));refresh();window.scrollTo(0,0)}
+
 function finishOrder(){if(count()===order.items.length)show('complete')}
-function resetOrder(){order.items.forEach(x=>x.scanned=false);localStorage.removeItem('driverscan-login');refresh();show('login')}
+function resetOrder(){order.items.forEach(x=>x.scanned=false);refresh();show('home')}
 document.getElementById('start').onclick=startScanner;document.getElementById('stop').onclick=()=>stopScanner();document.getElementById('manualBtn').onclick=()=>{if(manual.value.trim())handleBarcode(manual.value.trim());manual.value=''};
-function begin(){setTimeout(()=>{splash1.classList.remove('active');splash2.classList.add('active');setTimeout(()=>{splash2.classList.remove('active');show(localStorage.getItem('driverscan-login')==='1'?'home':'login')},1500)},1500)}
+function begin(){setTimeout(()=>{splash1.classList.remove('active');splash2.classList.add('active');setTimeout(()=>{splash2.classList.remove('active');show('home')},1500)},1500)}
 refresh();begin();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
