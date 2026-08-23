@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <title>DriverScan</title>
 <style>
-:root{--blue:#1677f2;--text:#111827;--muted:#667085;--line:#e6e9ef;--bg:#f7f8fa}
+:root{--blue:#1677f2;--text:#111827;--muted:#667085;--bg:#f7f8fa}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text)}
 .app{max-width:520px;margin:auto;min-height:100vh;background:#fff;padding-bottom:82px}.screen{display:none}.screen.active{display:block}
 #map{height:390px;width:100%;background:#eef1f4}.mapWrap{position:relative}
@@ -19,7 +19,7 @@
 .offerCard{margin-top:18px;background:#f5f6f8;border-radius:14px;padding:16px;display:flex;gap:13px;align-items:flex-start}
 .offerCard b{display:block;font-size:18px;margin-bottom:4px}.offerCard p{margin:0;color:#7b8491;line-height:1.45}
 .storeList{margin-top:18px}.storeCard{border:1px solid #e4e8ee;border-radius:14px;padding:14px;margin-top:10px;background:#fff}
-.storeCard .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.distance{color:#1677f2;font-weight:800;white-space:nowrap}.address{color:#717b89;margin-top:5px;font-size:14px}.small{font-size:12px;color:#8a93a0}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.distance{color:#1677f2;font-weight:800;white-space:nowrap}.address{color:#717b89;margin-top:5px;font-size:14px}.small{font-size:12px;color:#8a93a0}
 .section{padding:18px 0 0}.sectionHead{display:flex;justify-content:space-between;align-items:center}.sectionHead h2{font-size:20px;margin:0}.section p{color:#6f7783;margin:6px 0 20px}
 .chart{height:130px;display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #e7e9ed;padding:0 10px 12px}.barGroup{width:14%;text-align:center;color:#6c7480;font-size:13px}.bar{width:100%;max-width:46px;margin:auto;background:#e8edf4;border-radius:3px 3px 0 0}.bar.active{background:var(--blue)}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e3e7ec;padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:999}.navIn{max-width:520px;margin:auto;display:flex;justify-content:space-around}
@@ -39,7 +39,7 @@
   </div>
   <div class="sheet">
     <div class="handle"></div>
-    <button class="sparkBtn" onclick="refreshNearby()">SPARK NOW</button>
+    <button class="sparkBtn" id="sparkNow">SPARK NOW</button>
 
     <div class="offerCard">
       <div style="font-size:24px;color:#1677f2">⚙︎</div>
@@ -71,6 +71,7 @@
 <section id="earnings" class="screen"><div class="pageHead"><h1>Earnings</h1></div><div class="page"><div class="card"><b>Today</b><h2>$0.00</h2><p class="muted">Demo earnings view</p></div></div></section>
 <section id="notifications" class="screen"><div class="pageHead"><h1>Notifications</h1></div><div class="page"><div class="card">No new notifications.</div></div></section>
 <section id="more" class="screen"><div class="pageHead"><h1>More</h1></div><div class="page"><div class="card"><b>DriverScan</b><p class="muted">Nearby-store finder + barcode scanner</p></div></div></section>
+
 <section id="scan" class="screen">
   <div class="pageHead"><h1>Scan Items</h1></div>
   <div class="page">
@@ -97,9 +98,15 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script>
-let map, userMarker, watchId, reader=null, userPos=null;
-let storeMarkers=[];
+let map,userMarker,watchId,reader=null,userPos=null;
+let storeMarkers=[],storeResults=[];
+let searchInFlight=false,lastSearchPos=null,lastSearchAt=0;
 const fallback=[42.3314,-83.0458];
+const endpoints=[
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.nchc.org.tw/api/interpreter'
+];
 
 function initMap(){
   map=L.map('map',{zoomControl:false}).setView(fallback,12);
@@ -112,14 +119,27 @@ function requestLocation(){
   const label=document.getElementById('locationLabel');
   if(!navigator.geolocation){label.textContent='Location unavailable';return}
   if(watchId) navigator.geolocation.clearWatch(watchId);
+
+  let firstFix=true;
   watchId=navigator.geolocation.watchPosition(
     pos=>{
-      const lat=pos.coords.latitude, lon=pos.coords.longitude;
+      const lat=pos.coords.latitude,lon=pos.coords.longitude;
       userPos={lat,lon};
       userMarker.setLatLng([lat,lon]);
-      map.setView([lat,lon],13);
       label.textContent='Live location';
-      findNearbyWalmarts(lat,lon);
+
+      // Follow live location, but don't constantly restart the store search.
+      if(firstFix){
+        firstFix=false;
+        map.setView([lat,lon],13);
+        stableSearch(lat,lon,true);
+      }else{
+        // Only search again automatically after moving about 1 mile and at least 5 minutes.
+        if(lastSearchPos && Date.now()-lastSearchAt>300000){
+          const moved=milesBetween(lastSearchPos.lat,lastSearchPos.lon,lat,lon);
+          if(moved>=1) stableSearch(lat,lon,false);
+        }
+      }
     },
     err=>{
       label.textContent=err.code===1?'Allow Location access in Safari':'Unable to get location';
@@ -129,95 +149,118 @@ function requestLocation(){
   );
 }
 
-function refreshNearby(){
-  if(userPos) findNearbyWalmarts(userPos.lat,userPos.lon);
-  else requestLocation();
-}
-
 function milesBetween(lat1,lon1,lat2,lon2){
-  const R=3958.8;
-  const toRad=d=>d*Math.PI/180;
-  const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
+  const R=3958.8,toRad=d=>d*Math.PI/180;
+  const dLat=toRad(lat2-lat1),dLon=toRad(lon2-lon1);
   const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-async function findNearbyWalmarts(lat,lon){
+async function stableSearch(lat,lon,force){
+  if(searchInFlight) return;
+  if(!force && lastSearchPos){
+    const moved=milesBetween(lastSearchPos.lat,lastSearchPos.lon,lat,lon);
+    if(moved<0.5 && Date.now()-lastSearchAt<300000) return;
+  }
+
+  searchInFlight=true;
+  lastSearchPos={lat,lon};
+  lastSearchAt=Date.now();
+
   const label=document.getElementById('findingLabel');
   const stores=document.getElementById('stores');
   label.textContent='🛒 Finding Walmarts...';
-  stores.innerHTML='<div class="muted" style="padding:12px 0">Searching nearby stores…</div>';
 
-  const radius=25000; // 25 km
-  const q=`[out:json][timeout:20];
-  (
+  // Keep prior results visible while refreshing to stop screen flicker.
+  if(!storeResults.length){
+    stores.innerHTML='<div class="muted" style="padding:12px 0">Searching nearby stores…</div>';
+  }
+
+  const radius=30000;
+  const query=`[out:json][timeout:18];(
     nwr(around:${radius},${lat},${lon})["brand"="Walmart"];
     nwr(around:${radius},${lat},${lon})["name"~"Walmart",i];
-  );
-  out center tags;`;
+  );out center tags;`;
+
+  let data=null,lastErr=null;
+  for(const endpoint of endpoints){
+    try{
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),12000);
+      const r=await fetch(endpoint+'?data='+encodeURIComponent(query),{signal:controller.signal,cache:'no-store'});
+      clearTimeout(timeout);
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      data=await r.json();
+      break;
+    }catch(e){lastErr=e}
+  }
 
   try{
-    const url='https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q);
-    const r=await fetch(url);
-    if(!r.ok) throw new Error('Search service error');
-    const data=await r.json();
+    if(!data) throw lastErr||new Error('No search response');
 
     storeMarkers.forEach(m=>map.removeLayer(m)); storeMarkers=[];
-
     const seen=new Set();
     const results=data.elements.map(el=>{
-      const slat=el.lat ?? el.center?.lat;
-      const slon=el.lon ?? el.center?.lon;
+      const slat=el.lat??el.center?.lat, slon=el.lon??el.center?.lon;
       if(slat==null||slon==null) return null;
       const name=el.tags?.name||'Walmart';
       const street=[el.tags?.['addr:housenumber'],el.tags?.['addr:street']].filter(Boolean).join(' ');
-      const city=el.tags?.['addr:city']||'';
-      const state=el.tags?.['addr:state']||'';
+      const city=el.tags?.['addr:city']||'', state=el.tags?.['addr:state']||'';
       const address=[street,[city,state].filter(Boolean).join(', ')].filter(Boolean).join(' • ');
       const distance=milesBetween(lat,lon,slat,slon);
-      const key=(name+'|'+slat.toFixed(5)+'|'+slon.toFixed(5));
+      const key=slat.toFixed(5)+'|'+slon.toFixed(5);
       if(seen.has(key)) return null; seen.add(key);
       return {name,address,lat:slat,lon:slon,distance};
     }).filter(Boolean).sort((a,b)=>a.distance-b.distance).slice(0,10);
 
+    storeResults=results;
     document.getElementById('storeCount').textContent=results.length?`${results.length} found`:'';
     label.textContent=results.length?`🛒 ${results.length} Walmarts nearby`:'🛒 No nearby Walmart found';
 
     if(!results.length){
-      stores.innerHTML='<div class="muted" style="padding:12px 0">No Walmart locations found within about 15 miles.</div>';
-      return;
+      stores.innerHTML='<div class="muted" style="padding:12px 0">No Walmart locations found in this search area.</div>';
+    }else{
+      stores.innerHTML=results.map((s,i)=>`
+        <div class="storeCard" onclick="focusStore(${i})">
+          <div class="row">
+            <div><b>${escapeHtml(s.name)}</b><div class="address">${escapeHtml(s.address||'Address not listed')}</div></div>
+            <div class="distance">${s.distance.toFixed(1)} mi</div>
+          </div>
+        </div>`).join('');
+
+      results.forEach((s,i)=>{
+        storeMarkers.push(
+          L.marker([s.lat,s.lon]).addTo(map)
+           .bindPopup(`<b>${escapeHtml(s.name)}</b><br>${s.distance.toFixed(1)} mi away`)
+        );
+      });
     }
-
-    stores.innerHTML=results.map((s,i)=>`
-      <div class="storeCard" onclick="focusStore(${i})">
-        <div class="row">
-          <div><b>${escapeHtml(s.name)}</b><div class="address">${escapeHtml(s.address||'Address not listed')}</div></div>
-          <div class="distance">${s.distance.toFixed(1)} mi</div>
-        </div>
-      </div>`).join('');
-
-    window._stores=results;
-    results.forEach((s,i)=>{
-      const m=L.marker([s.lat,s.lon]).addTo(map).bindPopup(`<b>${escapeHtml(s.name)}</b><br>${s.distance.toFixed(1)} mi away`);
-      storeMarkers.push(m);
-    });
   }catch(e){
-    label.textContent='🛒 Store search unavailable';
-    stores.innerHTML='<div class="muted" style="padding:12px 0">Could not load nearby Walmart locations. Tap SPARK NOW to try again.</div>';
+    // Do not erase good results if the public lookup service temporarily fails.
+    if(storeResults.length){
+      label.textContent=`🛒 ${storeResults.length} Walmarts nearby`;
+    }else{
+      label.textContent='🛒 Store search unavailable';
+      stores.innerHTML='<div class="muted" style="padding:12px 0">Nearby-store service is temporarily unavailable. Tap SPARK NOW to retry.</div>';
+    }
+  }finally{
+    searchInFlight=false;
   }
 }
 
 function focusStore(i){
-  const s=window._stores?.[i];
-  if(!s) return;
+  const s=storeResults[i];
+  if(!s)return;
   map.setView([s.lat,s.lon],15);
   storeMarkers[i]?.openPopup();
   window.scrollTo({top:0,behavior:'smooth'});
 }
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-}
+document.getElementById('sparkNow').onclick=()=>{
+  if(userPos) stableSearch(userPos.lat,userPos.lon,true);
+  else requestLocation();
+};
 
 function show(id){
   if(id!=='scan') stopScanner(false);
@@ -227,7 +270,6 @@ function show(id){
   window.scrollTo(0,0);
   if(id==='home') setTimeout(()=>map&&map.invalidateSize(),100);
 }
-
 async function startScanner(){
   try{
     stopScanner(false);
@@ -236,22 +278,20 @@ async function startScanner(){
     await reader.decodeFromConstraints(
       {video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}},
       document.getElementById('video'),
-      (res)=>{if(res){document.getElementById('scanStatus').textContent='Barcode: '+res.getText();stopScanner(false)}}
+      res=>{if(res){document.getElementById('scanStatus').textContent='Barcode: '+res.getText();stopScanner(false)}}
     );
     document.getElementById('scanStatus').textContent='Camera ready. Center the barcode.';
   }catch(e){document.getElementById('scanStatus').textContent='Scanner error: '+e.message}
 }
-function stopScanner(msg=true){
-  if(reader){try{reader.reset()}catch(e){}reader=null}
-  if(msg) document.getElementById('scanStatus').textContent='Scanner stopped.';
-}
+function stopScanner(msg=true){if(reader){try{reader.reset()}catch(e){}reader=null}if(msg)document.getElementById('scanStatus').textContent='Scanner stopped.'}
 document.getElementById('startScan').onclick=startScanner;
 document.getElementById('stopScan').onclick=()=>stopScanner();
 document.getElementById('manualBtn').onclick=()=>{
   const v=document.getElementById('manual').value.trim();
-  if(v) document.getElementById('scanStatus').textContent='Barcode: '+v;
+  if(v)document.getElementById('scanStatus').textContent='Barcode: '+v;
 };
-if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 window.addEventListener('load',initMap);
 </script>
 </body></html>
