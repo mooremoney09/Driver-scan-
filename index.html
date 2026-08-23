@@ -52,7 +52,7 @@ video{width:100%;aspect-ratio:3/4;object-fit:cover;background:#000;border-radius
   <div class="row"><h1>Scan Items</h1><span class="pill" id="scanCount"></span></div>
   <div class="wrap"><video id="video" playsinline muted></video><div class="frame"></div></div>
   <div class="card">
-    <div id="status" class="muted">Tap Start Scanner, then allow camera access.</div>
+    <div id="status" class="muted">Tap Start Scanner, then allow camera access.</div><div class="muted" style="font-size:13px;margin-top:8px">Build: barcode 076737311597 enabled</div>
     <div class="progress"><div id="bar"></div></div>
     <button id="start" class="btn">Start Scanner</button>
     <button id="stop" class="btn secondary">Stop</button>
@@ -107,7 +107,10 @@ function refresh(){
 
 function handleBarcode(code){
   code=(code||'').replace(/\D/g,'');
-  const item=order.items.find(x=>x.barcode===code);
+  const candidates = new Set([code]);
+  if (code.length === 13 && code.startsWith('0')) candidates.add(code.slice(1));
+  if (code.length === 11) candidates.add('0' + code);
+  const item=order.items.find(x=>candidates.has(x.barcode));
   if(item){
     const wasScanned=item.scanned;
     item.scanned=true;
