@@ -16,8 +16,10 @@
 .locationLabel{position:absolute;z-index:500;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.94);padding:7px 13px;border-radius:999px;font-weight:700;font-size:13px}
 .sheet{background:#fff;border-radius:24px 24px 0 0;margin-top:-8px;position:relative;z-index:4;padding:14px 18px 24px}.handle{width:52px;height:5px;border-radius:99px;background:#d4d7dc;margin:0 auto 20px}
 .sparkBtn{width:100%;border:0;border-radius:14px;padding:19px;background:linear-gradient(90deg,#1475f4,#0864e7);color:white;font-size:20px;font-weight:900;letter-spacing:2px}
-.offerCard{margin-top:18px;background:#f5f6f8;border-radius:14px;padding:16px;display:flex;gap:13px;align-items:flex-start}.gear{font-size:24px;color:var(--blue)}
+.offerCard{margin-top:18px;background:#f5f6f8;border-radius:14px;padding:16px;display:flex;gap:13px;align-items:flex-start}
 .offerCard b{display:block;font-size:18px;margin-bottom:4px}.offerCard p{margin:0;color:#7b8491;line-height:1.45}
+.storeList{margin-top:18px}.storeCard{border:1px solid #e4e8ee;border-radius:14px;padding:14px;margin-top:10px;background:#fff}
+.storeCard .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.distance{color:#1677f2;font-weight:800;white-space:nowrap}.address{color:#717b89;margin-top:5px;font-size:14px}.small{font-size:12px;color:#8a93a0}
 .section{padding:18px 0 0}.sectionHead{display:flex;justify-content:space-between;align-items:center}.sectionHead h2{font-size:20px;margin:0}.section p{color:#6f7783;margin:6px 0 20px}
 .chart{height:130px;display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #e7e9ed;padding:0 10px 12px}.barGroup{width:14%;text-align:center;color:#6c7480;font-size:13px}.bar{width:100%;max-width:46px;margin:auto;background:#e8edf4;border-radius:3px 3px 0 0}.bar.active{background:var(--blue)}
 .nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e3e7ec;padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:999}.navIn{max-width:520px;margin:auto;display:flex;justify-content:space-around}
@@ -32,17 +34,24 @@
 <section id="home" class="screen active">
   <div class="mapWrap">
     <div id="map"></div>
-    <div class="finding">🛒 Finding Walmarts...</div>
+    <div id="findingLabel" class="finding">🛒 Finding Walmarts...</div>
     <div id="locationLabel" class="locationLabel">Locating…</div>
   </div>
   <div class="sheet">
     <div class="handle"></div>
-    <button class="sparkBtn" onclick="requestLocation()">SPARK NOW</button>
+    <button class="sparkBtn" onclick="refreshNearby()">SPARK NOW</button>
+
     <div class="offerCard">
-      <div class="gear">⚙︎</div>
+      <div style="font-size:24px;color:#1677f2">⚙︎</div>
       <div style="flex:1"><b>Getting more offers</b><p>Setting your location access to always sharing helps get more offers.</p></div>
       <div style="font-size:28px;color:#7f8792">›</div>
     </div>
+
+    <div class="storeList">
+      <div class="sectionHead"><h2>Nearby Walmart stores</h2><div id="storeCount" class="small"></div></div>
+      <div id="stores"><div class="muted" style="padding:12px 0">Waiting for your location…</div></div>
+    </div>
+
     <div class="section">
       <div class="sectionHead"><h2>Popular offer times: today</h2><div style="font-size:28px;color:#7f8792">›</div></div>
       <p>Explore additional days to drive this week.</p>
@@ -61,8 +70,7 @@
 <section id="trips" class="screen"><div class="pageHead"><h1>Trips</h1></div><div class="page"><div class="card"><b>Active Order</b><p class="muted">Demo Market • 3 items</p><button class="btn" onclick="show('scan')">Scan Items</button></div></div></section>
 <section id="earnings" class="screen"><div class="pageHead"><h1>Earnings</h1></div><div class="page"><div class="card"><b>Today</b><h2>$0.00</h2><p class="muted">Demo earnings view</p></div></div></section>
 <section id="notifications" class="screen"><div class="pageHead"><h1>Notifications</h1></div><div class="page"><div class="card">No new notifications.</div></div></section>
-<section id="more" class="screen"><div class="pageHead"><h1>More</h1></div><div class="page"><div class="card"><b>DriverScan</b><p class="muted">Prototype driver tools</p></div></div></section>
-
+<section id="more" class="screen"><div class="pageHead"><h1>More</h1></div><div class="page"><div class="card"><b>DriverScan</b><p class="muted">Nearby-store finder + barcode scanner</p></div></div></section>
 <section id="scan" class="screen">
   <div class="pageHead"><h1>Scan Items</h1></div>
   <div class="page">
@@ -89,14 +97,17 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script>
-let map, marker, watchId, reader=null;
+let map, userMarker, watchId, reader=null, userPos=null;
+let storeMarkers=[];
 const fallback=[42.3314,-83.0458];
+
 function initMap(){
   map=L.map('map',{zoomControl:false}).setView(fallback,12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
-  marker=L.circleMarker(fallback,{radius:9,weight:4,color:'#fff',fillColor:'#1677f2',fillOpacity:1}).addTo(map);
+  userMarker=L.circleMarker(fallback,{radius:9,weight:4,color:'#fff',fillColor:'#1677f2',fillOpacity:1}).addTo(map);
   requestLocation();
 }
+
 function requestLocation(){
   const label=document.getElementById('locationLabel');
   if(!navigator.geolocation){label.textContent='Location unavailable';return}
@@ -104,14 +115,110 @@ function requestLocation(){
   watchId=navigator.geolocation.watchPosition(
     pos=>{
       const lat=pos.coords.latitude, lon=pos.coords.longitude;
-      marker.setLatLng([lat,lon]);
-      map.setView([lat,lon],15);
-      label.textContent=`Live location • ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+      userPos={lat,lon};
+      userMarker.setLatLng([lat,lon]);
+      map.setView([lat,lon],13);
+      label.textContent='Live location';
+      findNearbyWalmarts(lat,lon);
     },
-    err=>{label.textContent=err.code===1?'Allow Location access in Safari':'Unable to get location';},
-    {enableHighAccuracy:true,maximumAge:5000,timeout:15000}
+    err=>{
+      label.textContent=err.code===1?'Allow Location access in Safari':'Unable to get location';
+      document.getElementById('findingLabel').textContent='Location needed';
+    },
+    {enableHighAccuracy:true,maximumAge:10000,timeout:15000}
   );
 }
+
+function refreshNearby(){
+  if(userPos) findNearbyWalmarts(userPos.lat,userPos.lon);
+  else requestLocation();
+}
+
+function milesBetween(lat1,lon1,lat2,lon2){
+  const R=3958.8;
+  const toRad=d=>d*Math.PI/180;
+  const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
+  const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+async function findNearbyWalmarts(lat,lon){
+  const label=document.getElementById('findingLabel');
+  const stores=document.getElementById('stores');
+  label.textContent='🛒 Finding Walmarts...';
+  stores.innerHTML='<div class="muted" style="padding:12px 0">Searching nearby stores…</div>';
+
+  const radius=25000; // 25 km
+  const q=`[out:json][timeout:20];
+  (
+    nwr(around:${radius},${lat},${lon})["brand"="Walmart"];
+    nwr(around:${radius},${lat},${lon})["name"~"Walmart",i];
+  );
+  out center tags;`;
+
+  try{
+    const url='https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q);
+    const r=await fetch(url);
+    if(!r.ok) throw new Error('Search service error');
+    const data=await r.json();
+
+    storeMarkers.forEach(m=>map.removeLayer(m)); storeMarkers=[];
+
+    const seen=new Set();
+    const results=data.elements.map(el=>{
+      const slat=el.lat ?? el.center?.lat;
+      const slon=el.lon ?? el.center?.lon;
+      if(slat==null||slon==null) return null;
+      const name=el.tags?.name||'Walmart';
+      const street=[el.tags?.['addr:housenumber'],el.tags?.['addr:street']].filter(Boolean).join(' ');
+      const city=el.tags?.['addr:city']||'';
+      const state=el.tags?.['addr:state']||'';
+      const address=[street,[city,state].filter(Boolean).join(', ')].filter(Boolean).join(' • ');
+      const distance=milesBetween(lat,lon,slat,slon);
+      const key=(name+'|'+slat.toFixed(5)+'|'+slon.toFixed(5));
+      if(seen.has(key)) return null; seen.add(key);
+      return {name,address,lat:slat,lon:slon,distance};
+    }).filter(Boolean).sort((a,b)=>a.distance-b.distance).slice(0,10);
+
+    document.getElementById('storeCount').textContent=results.length?`${results.length} found`:'';
+    label.textContent=results.length?`🛒 ${results.length} Walmarts nearby`:'🛒 No nearby Walmart found';
+
+    if(!results.length){
+      stores.innerHTML='<div class="muted" style="padding:12px 0">No Walmart locations found within about 15 miles.</div>';
+      return;
+    }
+
+    stores.innerHTML=results.map((s,i)=>`
+      <div class="storeCard" onclick="focusStore(${i})">
+        <div class="row">
+          <div><b>${escapeHtml(s.name)}</b><div class="address">${escapeHtml(s.address||'Address not listed')}</div></div>
+          <div class="distance">${s.distance.toFixed(1)} mi</div>
+        </div>
+      </div>`).join('');
+
+    window._stores=results;
+    results.forEach((s,i)=>{
+      const m=L.marker([s.lat,s.lon]).addTo(map).bindPopup(`<b>${escapeHtml(s.name)}</b><br>${s.distance.toFixed(1)} mi away`);
+      storeMarkers.push(m);
+    });
+  }catch(e){
+    label.textContent='🛒 Store search unavailable';
+    stores.innerHTML='<div class="muted" style="padding:12px 0">Could not load nearby Walmart locations. Tap SPARK NOW to try again.</div>';
+  }
+}
+
+function focusStore(i){
+  const s=window._stores?.[i];
+  if(!s) return;
+  map.setView([s.lat,s.lon],15);
+  storeMarkers[i]?.openPopup();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
 function show(id){
   if(id!=='scan') stopScanner(false);
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -120,6 +227,7 @@ function show(id){
   window.scrollTo(0,0);
   if(id==='home') setTimeout(()=>map&&map.invalidateSize(),100);
 }
+
 async function startScanner(){
   try{
     stopScanner(false);
