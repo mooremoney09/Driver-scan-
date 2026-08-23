@@ -98,7 +98,7 @@
     <div class="top"><div class="title">Scan Items</div><span class="pill" id="scanCount">0/0</span></div>
     <div id="reader"></div>
     <div class="card">
-      <div id="scanMessage" class="muted">Tap “Start Camera” and allow camera access.</div>
+      <div id="scanMessage" class="muted">Tap “Start Camera” and allow camera access.</div><div class="notice" style="margin-top:8px">For UPC barcodes: use the rear camera, avoid glare, and keep the entire barcode inside the white box.</div>
       <div class="progress" style="margin:14px 0"><div id="progressBar"></div></div>
       <div class="row">
         <button id="startCam" class="btn" onclick="startScanner()">Start Camera</button>
@@ -227,23 +227,83 @@ function handleCode(code){
 }
 async function startScanner(){
   if(scannerRunning) return;
+
   if(!window.Html5Qrcode){
-    scanMessage.innerHTML='<span class="warn">Scanner library could not load. Check your internet connection.</span>';
+    scanMessage.innerHTML='<span class="warn">Scanner library could not load. Check your internet connection and reopen the app.</span>';
     return;
   }
-  html5QrCode = new Html5Qrcode("reader");
+
+  const supportedFormats = [
+    Html5QrcodeSupportedFormats.UPC_A,
+    Html5QrcodeSupportedFormats.UPC_E,
+    Html5QrcodeSupportedFormats.EAN_8,
+    Html5QrcodeSupportedFormats.EAN_13,
+    Html5QrcodeSupportedFormats.CODE_128,
+    Html5QrcodeSupportedFormats.CODE_39,
+    Html5QrcodeSupportedFormats.CODE_93,
+    Html5QrcodeSupportedFormats.ITF,
+    Html5QrcodeSupportedFormats.CODABAR,
+    Html5QrcodeSupportedFormats.QR_CODE
+  ];
+
+  html5QrCode = new Html5Qrcode("reader", {
+    formatsToSupport: supportedFormats,
+    useBarCodeDetectorIfSupported: false
+  });
+
   try{
+    const boxWidth = Math.max(280, Math.min(window.innerWidth - 70, 420));
+
     await html5QrCode.start(
-      { facingMode: "environment" },
-      { fps:10, qrbox:{width:280,height:160}, aspectRatio:1.4 },
-      decodedText => handleCode(decodedText),
+      { facingMode: { exact: "environment" } },
+      {
+        fps: 18,
+        qrbox: { width: boxWidth, height: 150 },
+        aspectRatio: 1.777778,
+        disableFlip: false,
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: false
+        }
+      },
+      decodedText => handleCode(decodedText.replace(/\s+/g, "")),
       () => {}
     );
-    scannerRunning=true;
-    startCam.classList.add("hide"); stopCam.classList.remove("hide");
-    scanMessage.textContent="Camera ready. Center the barcode in the frame.";
+
+    scannerRunning = true;
+    startCam.classList.add("hide");
+    stopCam.classList.remove("hide");
+    scanMessage.textContent="Scanner ready. Hold the barcode flat, fill most of the white box, and keep the phone about 4–8 inches away.";
+
+    // Ask iPhone Safari for continuous focus when the browser allows it.
+    try{
+      await html5QrCode.applyVideoConstraints({
+        advanced: [{ focusMode: "continuous" }]
+      });
+    }catch(e){
+      // Some iPhone/Safari versions do not expose manual focus controls.
+    }
   }catch(e){
-    scanMessage.innerHTML='<span class="warn">Camera could not start. Open this app from an HTTPS website, then allow Camera permission in Safari.</span>';
+    // Some iPhones reject `exact`; retry with normal rear-camera preference.
+    try{
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        {
+          fps: 18,
+          qrbox: { width: Math.max(280, Math.min(window.innerWidth - 70, 420)), height: 150 },
+          aspectRatio: 1.777778,
+          disableFlip: false
+        },
+        decodedText => handleCode(decodedText.replace(/\s+/g, "")),
+        () => {}
+      );
+
+      scannerRunning = true;
+      startCam.classList.add("hide");
+      stopCam.classList.remove("hide");
+      scanMessage.textContent="Scanner ready. Hold the barcode flat, fill most of the white box, and keep the phone about 4–8 inches away.";
+    }catch(secondError){
+      scanMessage.innerHTML='<span class="warn">Camera could not start correctly. Close the Home Screen app, reopen it, and allow Camera access when asked.</span>';
+    }
   }
 }
 async function stopScanner(){
