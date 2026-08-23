@@ -67,6 +67,21 @@
   </div>
 </section>
 
+
+<section id="offers" class="screen">
+  <div class="pageHead">
+    <h1 style="margin-bottom:4px">Nearby Demo Offers</h1>
+    <div style="opacity:.8">Test offers generated from nearby Walmart locations</div>
+  </div>
+  <div class="page">
+    <div class="card" style="background:#fff7d6;border-color:#f1d56b">
+      <b>DEMO / TEST DATA</b>
+      <p class="muted" style="margin-bottom:0">These are not live Spark or Walmart delivery offers. Store locations come from the nearby-store search; offer details are generated only for testing this app.</p>
+    </div>
+    <div id="offerCards"></div>
+  </div>
+</section>
+
 <section id="trips" class="screen"><div class="pageHead"><h1>Trips</h1></div><div class="page"><div class="card"><b>Active Order</b><p class="muted">Demo Market • 3 items</p><button class="btn" onclick="show('scan')">Scan Items</button></div></div></section>
 <section id="earnings" class="screen"><div class="pageHead"><h1>Earnings</h1></div><div class="page"><div class="card"><b>Today</b><h2>$0.00</h2></div></div></section>
 <section id="notifications" class="screen"><div class="pageHead"><h1>Notifications</h1></div><div class="page"><div class="card">No new notifications.</div></div></section>
@@ -88,6 +103,7 @@
 
 <nav class="nav"><div class="navIn">
   <button class="active" data-id="home" onclick="show('home')"><span class="ico">⌂</span>Home</button>
+  <button data-id="offers" onclick="renderDemoOffers();show('offers')"><span class="ico">▣</span>Offers</button>
   <button data-id="trips" onclick="show('trips')"><span class="ico">🚗</span>Trips</button>
   <button data-id="earnings" onclick="show('earnings')"><span class="ico">$</span>Earnings</button>
   <button data-id="notifications" onclick="show('notifications')"><span class="ico">♧</span>Notifications</button>
@@ -251,7 +267,45 @@ function focusStore(i){
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 
-document.getElementById('sparkNow').onclick=()=>userPos?findStores(userPos.lat,userPos.lon):requestLocation();
+document.getElementById('sparkNow').onclick=async()=>{
+  if(!userPos){requestLocation();return}
+  await findStores(userPos.lat,userPos.lon);
+  renderDemoOffers();
+  show('offers');
+};
+
+function renderDemoOffers(){
+  const box=document.getElementById('offerCards');
+  if(!storeResults.length){
+    box.innerHTML='<div class="card"><b>No nearby stores loaded</b><p class="muted">Return Home, allow location access, and tap SPARK NOW again.</p></div>';
+    return;
+  }
+  const pays=[18,22,15,27,20,24,17,30,19,25,21,16];
+  const items=[4,9,2,13,6,8,3,15,5,11,7,1];
+  const types=['Curbside Pickup','Pickup','Curbside Pickup','Pickup'];
+  box.innerHTML=storeResults.slice(0,8).map((s,i)=>`
+    <div class="card">
+      <div class="row">
+        <div>
+          <div style="font-size:12px;font-weight:900;color:#9a6a00;letter-spacing:.5px">DEMO OFFER</div>
+          <h2 style="margin:4px 0 2px">${escapeHtml(s.name)}</h2>
+          <div class="muted">${s.distance.toFixed(1)} mi away</div>
+        </div>
+        <div style="background:#e9f4ff;color:#0864c9;padding:7px 10px;border-radius:999px;font-weight:800;font-size:12px">TEST</div>
+      </div>
+      <div style="margin:20px 0 8px;font-size:28px;font-weight:900">$${pays[i%pays.length]}.00 <span class="muted" style="font-size:14px;font-weight:500">demo earnings</span></div>
+      <div class="muted">${types[i%types.length]} • ${items[i%items.length]} items</div>
+      <div class="muted" style="margin-top:5px">Test window: ${i%2?'3:00 PM – 5:00 PM':'2:00 PM – 4:00 PM'}</div>
+      <button class="btn" onclick="acceptDemoOffer(${i})">Accept Demo Offer</button>
+    </div>`).join('');
+}
+function acceptDemoOffer(i){
+  const s=storeResults[i];
+  localStorage.setItem('demoAcceptedStore', JSON.stringify(s||{}));
+  show('trips');
+  const trip=document.querySelector('#trips .card');
+  if(trip && s) trip.innerHTML='<div style="font-size:12px;font-weight:900;color:#9a6a00">DEMO ACTIVE ORDER</div><h2>'+escapeHtml(s.name)+'</h2><p class="muted">'+s.distance.toFixed(1)+' mi away • Test order</p><button class="btn" onclick="show(\'scan\')">Scan Demo Items</button>';
+}
 
 function show(id){
   if(id!=='scan')stopScanner(false);
