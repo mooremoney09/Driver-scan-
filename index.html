@@ -3,179 +3,147 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#04152a">
+<meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="manifest.json">
-<title>DriverScan</title><!-- full-flow-summary-v2 -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<title>DriverScan</title>
 <style>
-:root{--navy:#04152a;--navy2:#09213c;--blue:#1778ff;--green:#29b765;--orange:#ffae2f;--muted:#97a7ba;--line:#e7edf4;--bg:#eef3f8}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#132033}
-.app{max-width:520px;margin:auto;min-height:100vh;padding-bottom:92px}.screen{display:none}.screen.active{display:block}
-.darkHead{background:linear-gradient(#031426,#071a31);color:#fff;padding:18px 18px 22px}.titlebar{display:flex;justify-content:space-between;align-items:center}.titlebar h1{font-size:30px;margin:0}.sub{color:#c6d0db;margin-top:4px}
-.steps{display:grid;grid-template-columns:repeat(4,1fr);margin-top:20px;gap:4px}.step{text-align:center;color:#b7c3d0;font-size:11px;position:relative}.dot{width:34px;height:34px;border-radius:50%;margin:auto;background:#75849a;color:white;display:grid;place-items:center;font-weight:800;font-size:16px}.step.done .dot,.step.active .dot{background:var(--blue)}.step:after{content:"";position:absolute;top:16px;left:60%;width:80%;height:3px;background:#667488}.step.done:after{background:var(--blue)}.step:last-child:after{display:none}.dot{position:relative;z-index:1}.step span{display:block;margin-top:8px;font-weight:700}
-.content{padding:14px}.card{background:#fff;border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.04)}.row{display:flex;justify-content:space-between;align-items:center;gap:12px}.muted{color:#748295}.badge{background:#eaf3ff;color:#1265d6;padding:8px 10px;border-radius:12px;font-weight:700;font-size:13px}
-.btn{width:100%;border:0;border-radius:16px;padding:17px;background:var(--blue);color:#fff;font-size:18px;font-weight:800;margin-top:14px}.btn.secondary{background:#1e3e62}.btn:disabled{opacity:.45}
-.input{width:100%;padding:15px;border:1px solid #365b80;background:#061a2f;color:#fff;border-radius:15px;margin-top:10px;font-size:17px}
-.success{background:#eaf8ef;border-radius:14px;padding:14px;display:flex;gap:10px;align-items:center;color:#167c40;margin-top:14px}.check{width:36px;height:36px;border-radius:50%;background:#1da65a;color:#fff;display:grid;place-items:center;font-size:22px;font-weight:900}
-.sectionTitle{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:16px;margin-bottom:8px}.item{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}.item small{display:block;color:#6e7d8d;margin-top:2px}
-.total{font-size:30px;font-weight:900;color:#168643}.info{background:#eef6ff;color:#32618d;padding:12px;border-radius:12px;font-size:13px;margin-top:12px}
-.nav{position:fixed;left:0;right:0;bottom:0;background:#031325;color:#a9b7c9;border-top:1px solid #203b58;padding:10px 10px calc(10px + env(safe-area-inset-bottom));z-index:50}.navin{max-width:520px;margin:auto;display:flex;justify-content:space-around}.nav button{background:none;border:0;color:inherit;font-size:12px}.nav button.active{color:#4ea0ff}
-video{width:100%;aspect-ratio:3/4;object-fit:cover;background:#000;border-radius:22px}.wrap{position:relative}.frame{position:absolute;left:14%;right:14%;top:38%;height:24%;border:4px solid #fff;border-left-width:0;border-right-width:0;pointer-events:none}
-.scanCard{background:#113052;border:1px solid #2f557d;color:#fff;border-radius:22px;padding:16px;margin:14px}.progress{height:10px;background:#1b3d60;border-radius:99px;overflow:hidden;margin:12px 0}.progress>div{height:100%;background:var(--blue);width:0}
-.warnText{color:var(--orange);font-weight:700}.goodText{color:#54d98c;font-weight:700}
-.passCard{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,.08)}.passHead{background:linear-gradient(90deg,#0c4fb8,#125fd6);color:#fff;padding:18px}.passBody{padding:18px}.passLabel{font-size:12px;color:#748295;font-weight:800}.passValue{font-size:18px;font-weight:800;margin-top:3px}.codebox{background:#f7f9fc;border:1px dashed #c6d0dc;border-radius:16px;padding:20px;text-align:center;margin-top:16px}.warnBox{margin-top:12px;background:#fff3cd;color:#765800;padding:12px;border-radius:12px;font-size:12px;font-weight:700}
+:root{--blue:#1677f2;--text:#111827;--muted:#667085;--line:#e6e9ef;--bg:#f7f8fa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text)}
+.app{max-width:520px;margin:auto;min-height:100vh;background:#fff;padding-bottom:82px}.screen{display:none}.screen.active{display:block}
+#map{height:390px;width:100%;background:#eef1f4}.mapWrap{position:relative}
+.finding{position:absolute;z-index:500;top:22px;left:50%;transform:translateX(-50%);background:#fff;padding:12px 18px;border-radius:14px;box-shadow:0 3px 16px rgba(0,0,0,.13);font-weight:700;white-space:nowrap}
+.locationLabel{position:absolute;z-index:500;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.94);padding:7px 13px;border-radius:999px;font-weight:700;font-size:13px}
+.sheet{background:#fff;border-radius:24px 24px 0 0;margin-top:-8px;position:relative;z-index:4;padding:14px 18px 24px}.handle{width:52px;height:5px;border-radius:99px;background:#d4d7dc;margin:0 auto 20px}
+.sparkBtn{width:100%;border:0;border-radius:14px;padding:19px;background:linear-gradient(90deg,#1475f4,#0864e7);color:white;font-size:20px;font-weight:900;letter-spacing:2px}
+.offerCard{margin-top:18px;background:#f5f6f8;border-radius:14px;padding:16px;display:flex;gap:13px;align-items:flex-start}.gear{font-size:24px;color:var(--blue)}
+.offerCard b{display:block;font-size:18px;margin-bottom:4px}.offerCard p{margin:0;color:#7b8491;line-height:1.45}
+.section{padding:18px 0 0}.sectionHead{display:flex;justify-content:space-between;align-items:center}.sectionHead h2{font-size:20px;margin:0}.section p{color:#6f7783;margin:6px 0 20px}
+.chart{height:130px;display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #e7e9ed;padding:0 10px 12px}.barGroup{width:14%;text-align:center;color:#6c7480;font-size:13px}.bar{width:100%;max-width:46px;margin:auto;background:#e8edf4;border-radius:3px 3px 0 0}.bar.active{background:var(--blue)}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e3e7ec;padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:999}.navIn{max-width:520px;margin:auto;display:flex;justify-content:space-around}
+.nav button{border:0;background:none;color:#5e6673;font-size:11px;padding:3px 5px}.nav button.active{color:var(--blue);font-weight:700}.nav .ico{font-size:22px;display:block;margin-bottom:2px}
+.pageHead{background:#0a1e35;color:white;padding:24px 18px}.page{padding:18px}.card{background:#fff;border-radius:16px;border:1px solid #e5e9ef;padding:16px;margin-bottom:14px}
+.scanVideo{width:100%;aspect-ratio:3/4;object-fit:cover;background:#000;border-radius:18px}.btn{width:100%;border:0;border-radius:14px;padding:16px;background:var(--blue);color:white;font-weight:800;font-size:17px;margin-top:10px}
+.input{width:100%;border:1px solid #cfd6df;border-radius:12px;padding:14px;font-size:16px;margin-top:10px}.muted{color:#7b8491}
 </style>
 </head>
 <body>
 <div class="app">
-
-<section id="login" class="screen active">
-  <div class="darkHead" style="min-height:100vh">
-    <div style="text-align:center;padding-top:70px"><div style="font-size:64px">📦</div><h1 style="font-size:40px;margin:10px 0">DriverScan</h1><p class="sub">Delivery order scanning prototype</p></div>
-    <div style="margin-top:50px;background:#102d4d;border:1px solid #2f557d;border-radius:22px;padding:16px">
-      <input id="email" class="input" placeholder="Email">
-      <input id="password" class="input" type="password" placeholder="Password">
-      <button class="btn" onclick="login()">Log In</button>
-      <p class="sub">Prototype login: enter any non-empty email and password.</p>
+<section id="home" class="screen active">
+  <div class="mapWrap">
+    <div id="map"></div>
+    <div class="finding">🛒 Finding Walmarts...</div>
+    <div id="locationLabel" class="locationLabel">Locating…</div>
+  </div>
+  <div class="sheet">
+    <div class="handle"></div>
+    <button class="sparkBtn" onclick="requestLocation()">SPARK NOW</button>
+    <div class="offerCard">
+      <div class="gear">⚙︎</div>
+      <div style="flex:1"><b>Getting more offers</b><p>Setting your location access to always sharing helps get more offers.</p></div>
+      <div style="font-size:28px;color:#7f8792">›</div>
+    </div>
+    <div class="section">
+      <div class="sectionHead"><h2>Popular offer times: today</h2><div style="font-size:28px;color:#7f8792">›</div></div>
+      <p>Explore additional days to drive this week.</p>
+      <div class="chart">
+        <div class="barGroup"><div class="bar" style="height:8px"></div><div>6a</div></div>
+        <div class="barGroup"><div class="bar" style="height:10px"></div><div>9a</div></div>
+        <div class="barGroup"><div class="bar" style="height:8px"></div><div>12p</div></div>
+        <div class="barGroup"><div class="bar" style="height:12px"></div><div>3p</div></div>
+        <div class="barGroup"><div class="bar active" style="height:90px"></div><div>6p</div></div>
+        <div class="barGroup"><div class="bar active" style="height:72px"></div><div>9p</div></div>
+      </div>
     </div>
   </div>
 </section>
 
-<section id="home" class="screen">
-  <div class="darkHead"><div class="titlebar"><h1>DriverScan</h1><span class="badge">● Online</span></div></div>
-  <div class="content">
-    <div class="card"><div class="row"><b>Active Order</b><span class="badge">ORD-10042</span></div><h2>Demo Market</h2><div class="muted">123 Main Street</div><div class="row" style="margin-top:12px"><span id="homeProgress">0/3 scanned</span><b>$12.46</b></div><button class="btn" onclick="show('scan')">Continue Order</button></div>
-  </div>
-</section>
-
-<section id="orders" class="screen">
-  <div class="darkHead"><h1>Orders</h1></div>
-  <div class="content">
-    <div class="card"><div class="row"><b>Demo Market</b><span class="badge">ORD-10042</span></div><div class="muted">123 Main Street</div><div id="orderItems" style="margin-top:12px"></div></div>
-  </div>
-</section>
+<section id="trips" class="screen"><div class="pageHead"><h1>Trips</h1></div><div class="page"><div class="card"><b>Active Order</b><p class="muted">Demo Market • 3 items</p><button class="btn" onclick="show('scan')">Scan Items</button></div></div></section>
+<section id="earnings" class="screen"><div class="pageHead"><h1>Earnings</h1></div><div class="page"><div class="card"><b>Today</b><h2>$0.00</h2><p class="muted">Demo earnings view</p></div></div></section>
+<section id="notifications" class="screen"><div class="pageHead"><h1>Notifications</h1></div><div class="page"><div class="card">No new notifications.</div></div></section>
+<section id="more" class="screen"><div class="pageHead"><h1>More</h1></div><div class="page"><div class="card"><b>DriverScan</b><p class="muted">Prototype driver tools</p></div></div></section>
 
 <section id="scan" class="screen">
-  <div class="darkHead"><div class="row"><h1 style="margin:0">Scan Items</h1><span class="badge" id="scanCount">0/3</span></div></div>
-  <div class="wrap" style="padding:14px"><video id="video" playsinline muted></video><div class="frame"></div></div>
-  <div class="scanCard">
-    <div id="scanStatus" class="muted" style="color:#cfd8e5">Tap Start Scanner and allow camera access.</div>
-    <div class="progress"><div id="progressBar"></div></div>
-    <button class="btn" id="startBtn">Start Scanner</button>
-    <button class="btn secondary" id="stopBtn">Stop</button>
-    <input class="input" id="manualCode" inputmode="numeric" placeholder="Or enter barcode manually">
-    <button class="btn secondary" id="manualBtn">Check Barcode</button>
-    <button class="btn" id="reviewBtn" onclick="show('review')" disabled>Review Order</button>
-  </div>
-</section>
-
-<section id="review" class="screen">
-  <div class="darkHead">
-    <div class="titlebar"><span onclick="show('scan')" style="font-size:28px">‹</span><div style="text-align:center"><h1>REVIEW ORDER</h1><div class="sub">Step 3 of 4</div></div><span>?</span></div>
-    <div class="steps">
-      <div class="step done"><div class="dot">✓</div><span>ACCEPT ORDER</span></div>
-      <div class="step done"><div class="dot">✓</div><span>SCAN ITEMS</span></div>
-      <div class="step active"><div class="dot">3</div><span>REVIEW ORDER</span></div>
-      <div class="step"><div class="dot">4</div><span>SUMMARY</span></div>
-    </div>
-  </div>
-  <div class="content">
-    <div class="card"><div class="row"><div><b>Demo Market</b><div class="muted">123 Main Street</div></div><div class="badge">ORD-10042</div></div><div class="success"><div class="check">✓</div><div><b>All required items scanned</b><div class="muted">3 of 3 items verified</div></div></div></div>
-    <div class="card"><div class="sectionTitle"><span>ITEM SUMMARY</span><span style="color:#1778ff">3 items</span></div><div id="reviewItems"></div></div>
-    <div class="card"><div class="sectionTitle"><span>ORDER TOTAL</span><span class="total">$12.46</span></div><div class="info">DriverScan prototype summary only. It does not process payment or create a retailer receipt or exit authorization.</div><button class="btn" onclick="show('summary')">CONTINUE TO ORDER SUMMARY</button></div>
-  </div>
-</section>
-
-<section id="summary" class="screen">
-  <div class="darkHead">
-    <div class="titlebar">
-      <span onclick="show('review')" style="font-size:28px;cursor:pointer">‹</span>
-      <div style="text-align:center">
-        <h1>ORDER SUMMARY</h1>
-        <div class="sub">Step 4 of 4</div>
-      </div>
-      <span>?</span>
-    </div>
-  </div>
-
-  <div class="content">
-    <div class="card" style="padding:10px">
-      <img src="verification-summary.png" alt="Order verification summary preview"
-           style="width:100%;display:block;border-radius:14px">
-      <div class="info" style="margin-top:12px">
-        DriverScan demo summary preview. Use the buttons below to continue through the app.
-      </div>
-      <button class="btn" onclick="completeOrder()">COMPLETE ORDER</button>
-      <button class="btn secondary" onclick="show('home')">BACK TO HOME</button>
+  <div class="pageHead"><h1>Scan Items</h1></div>
+  <div class="page">
+    <video id="video" class="scanVideo" playsinline muted></video>
+    <div class="card">
+      <div id="scanStatus" class="muted">Tap Start Scanner.</div>
+      <button class="btn" id="startScan">Start Scanner</button>
+      <button class="btn" id="stopScan" style="background:#29445f">Stop</button>
+      <input id="manual" class="input" inputmode="numeric" placeholder="Or enter barcode manually">
+      <button class="btn" id="manualBtn" style="background:#29445f">Check Barcode</button>
     </div>
   </div>
 </section>
-
-<section id="profile" class="screen">
-  <div class="darkHead"><h1>Profile</h1></div>
-  <div class="content"><div class="card"><b>DriverScan Prototype</b><p class="muted">Order-aware barcode scanning</p></div><button class="btn secondary" onclick="logout()">Log Out</button></div>
-</section>
-
 </div>
 
-<div id="nav" class="nav" style="display:none"><div class="navin">
-<button data-screen="home" onclick="show('home')">⌂<br>Home</button>
-<button data-screen="orders" onclick="show('orders')">☷<br>Orders</button>
-<button data-screen="scan" onclick="show('scan')">▣<br>Scan</button>
-<button data-screen="profile" onclick="show('profile')">◉<br>Profile</button>
-</div></div>
+<nav class="nav"><div class="navIn">
+  <button class="active" data-id="home" onclick="show('home')"><span class="ico">⌂</span>Home</button>
+  <button data-id="trips" onclick="show('trips')"><span class="ico">🚗</span>Trips</button>
+  <button data-id="earnings" onclick="show('earnings')"><span class="ico">$</span>Earnings</button>
+  <button data-id="notifications" onclick="show('notifications')"><span class="ico">♧</span>Notifications</button>
+  <button data-id="more" onclick="show('more')"><span class="ico">•••</span>More</button>
+</div></nav>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script>
-const order={items:[
-{name:"Fresh Produce Item",barcode:"076737311597",qty:1,price:3.99,scanned:false},
-{name:"Scanned Product",barcode:"027541010022",qty:1,price:5.49,scanned:false},
-{name:"Cheese Crackers",barcode:"024100210217",qty:1,price:2.98,scanned:false}
-]};
-let reader=null;
-const $=id=>document.getElementById(id);
-function count(){return order.items.filter(i=>i.scanned).length}
-function refresh(){
-  $("scanCount").textContent=`${count()}/3`;
-  $("homeProgress").textContent=`${count()}/3 scanned`;
-  $("progressBar").style.width=`${count()/3*100}%`;
-  $("reviewBtn").disabled=count()!==3;
-  $("orderItems").innerHTML=order.items.map(i=>`<div class="item"><div><b>${i.scanned?"✅":"○"} ${i.name}</b><small>${i.barcode}</small></div><div>Qty:${i.qty}</div><b>$${i.price.toFixed(2)}</b></div>`).join("");
-  $("reviewItems").innerHTML=order.items.map(i=>`<div class="item"><div><b>${i.name}</b><small>UPC ${i.barcode}</small></div><div>Qty:${i.qty}</div><b>$${i.price.toFixed(2)}</b></div>`).join("");
+let map, marker, watchId, reader=null;
+const fallback=[42.3314,-83.0458];
+function initMap(){
+  map=L.map('map',{zoomControl:false}).setView(fallback,12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+  marker=L.circleMarker(fallback,{radius:9,weight:4,color:'#fff',fillColor:'#1677f2',fillOpacity:1}).addTo(map);
+  requestLocation();
 }
-function handleBarcode(code){
-  code=(code||"").replace(/\D/g,"");
-  const candidates=new Set([code]);
-  if(code.length===13&&code.startsWith("0")) candidates.add(code.slice(1));
-  if(code.length===11) candidates.add("0"+code);
-  const item=order.items.find(i=>candidates.has(i.barcode));
-  if(item){item.scanned=true;$("scanStatus").innerHTML=`<span class="goodText">Correct item found<br>${item.name}<br>${code}</span>`;navigator.vibrate?.(100)}
-  else{$("scanStatus").innerHTML=`<span class="warnText">Barcode not found in this order.<br>${code}</span>`}
-  refresh();
+function requestLocation(){
+  const label=document.getElementById('locationLabel');
+  if(!navigator.geolocation){label.textContent='Location unavailable';return}
+  if(watchId) navigator.geolocation.clearWatch(watchId);
+  watchId=navigator.geolocation.watchPosition(
+    pos=>{
+      const lat=pos.coords.latitude, lon=pos.coords.longitude;
+      marker.setLatLng([lat,lon]);
+      map.setView([lat,lon],15);
+      label.textContent=`Live location • ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+    },
+    err=>{label.textContent=err.code===1?'Allow Location access in Safari':'Unable to get location';},
+    {enableHighAccuracy:true,maximumAge:5000,timeout:15000}
+  );
+}
+function show(id){
+  if(id!=='scan') stopScanner(false);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
+  window.scrollTo(0,0);
+  if(id==='home') setTimeout(()=>map&&map.invalidateSize(),100);
 }
 async function startScanner(){
   try{
     stopScanner(false);
     reader=new ZXing.BrowserMultiFormatReader();
-    $("scanStatus").textContent="Starting rear camera…";
-    await reader.decodeFromConstraints({video:{facingMode:{ideal:"environment"},width:{ideal:1920},height:{ideal:1080}}},$("video"),(res,err)=>{if(res){handleBarcode(res.getText());stopScanner(false)}});
-    $("scanStatus").textContent="Camera ready. Center the barcode in the frame.";
-  }catch(e){$("scanStatus").innerHTML=`<span class="warnText">Scanner error: ${e.message}</span>`}
+    document.getElementById('scanStatus').textContent='Starting rear camera…';
+    await reader.decodeFromConstraints(
+      {video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}},
+      document.getElementById('video'),
+      (res)=>{if(res){document.getElementById('scanStatus').textContent='Barcode: '+res.getText();stopScanner(false)}}
+    );
+    document.getElementById('scanStatus').textContent='Camera ready. Center the barcode.';
+  }catch(e){document.getElementById('scanStatus').textContent='Scanner error: '+e.message}
 }
-function stopScanner(msg=true){if(reader){try{reader.reset()}catch(e){}reader=null}if(msg)$("scanStatus").textContent="Scanner stopped."}
-function show(id){
-  if(id!=="scan") stopScanner(false);
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  $(id).classList.add("active");
-  document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.screen===id));
-  if(id!=="login") $("nav").style.display="block";
-  window.scrollTo(0,0);refresh();
+function stopScanner(msg=true){
+  if(reader){try{reader.reset()}catch(e){}reader=null}
+  if(msg) document.getElementById('scanStatus').textContent='Scanner stopped.';
 }
-function login(){if($("email").value.trim()&&$("password").value.trim()){localStorage.setItem("driverscan-login","1");show("home")}}
-function logout(){localStorage.removeItem("driverscan-login");$("nav").style.display="none";show("login")}
-function completeOrder(){alert("Order completed in DriverScan prototype.");show("home")}
-$("startBtn").onclick=startScanner;$("stopBtn").onclick=()=>stopScanner();$("manualBtn").onclick=()=>{if($("manualCode").value.trim())handleBarcode($("manualCode").value.trim());$("manualCode").value=""}
-if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js").catch(()=>{});
-refresh();
-if(localStorage.getItem("driverscan-login")==="1")show("home");
+document.getElementById('startScan').onclick=startScanner;
+document.getElementById('stopScan').onclick=()=>stopScanner();
+document.getElementById('manualBtn').onclick=()=>{
+  const v=document.getElementById('manual').value.trim();
+  if(v) document.getElementById('scanStatus').textContent='Barcode: '+v;
+};
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+window.addEventListener('load',initMap);
 </script>
 </body></html>
