@@ -1,341 +1,171 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#061426" />
-  <link rel="manifest" href="manifest.json" />
-  <title>DriverScan</title>
-  <style>
-    :root{
-      --bg:#061426;--panel:#0d2139;--panel2:#112b48;--text:#fff;--muted:#aab8ca;
-      --blue:#2385ff;--green:#3ddc84;--orange:#ff9f1c;--danger:#ff5d5d;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(#061426,#03101d);color:var(--text);min-height:100vh}
-    button,input{font:inherit}
-    .app{max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:88px}
-    .screen{display:none;padding:18px}
-    .screen.active{display:block}
-    .top{display:flex;align-items:center;justify-content:space-between;margin:8px 0 18px}
-    .brand{font-weight:800;font-size:27px}
-    .small{font-size:13px;color:var(--muted)}
-    .title{font-size:28px;font-weight:800;margin:6px 0}
-    .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid #203b59;border-radius:20px;padding:16px;margin:14px 0}
-    .row{display:flex;gap:12px;align-items:center;justify-content:space-between}
-    .stack{display:grid;gap:12px}
-    .input{width:100%;padding:15px 14px;border-radius:14px;border:1px solid #314b68;background:#091a2d;color:#fff}
-    .btn{border:0;border-radius:15px;padding:15px 18px;font-weight:750;color:#fff;background:var(--blue);width:100%}
-    .btn.secondary{background:#17314e}
-    .btn.good{background:#16884d}
-    .btn:disabled{opacity:.45}
-    .pill{display:inline-block;padding:7px 10px;border-radius:999px;background:#17314e;color:#bcd3ef;font-size:13px}
-    .good{color:var(--green)} .warn{color:var(--orange)} .muted{color:var(--muted)}
-    .metric{flex:1;text-align:center;padding:12px;background:#0a1c31;border-radius:15px}
-    .metric b{font-size:20px}
-    .item{padding:12px 0;border-bottom:1px solid #20364f}
-    .item:last-child{border-bottom:0}
-    #reader{overflow:hidden;border-radius:20px;background:#000}
-    .nav{position:fixed;bottom:0;left:0;right:0;background:rgba(4,16,29,.96);backdrop-filter:blur(16px);border-top:1px solid #21364e;padding:10px max(12px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));z-index:20}
-    .navin{max-width:520px;margin:0 auto;display:flex;justify-content:space-around}
-    .nav button{background:none;border:0;color:#aab8ca;font-size:12px}
-    .nav button.active{color:#59a8ff}
-    .nav .ico{display:block;font-size:22px;margin-bottom:3px}
-    .hero{text-align:center;padding:28px 12px}
-    .hero .check{font-size:66px;color:var(--green)}
-    .qrwrap{background:white;padding:18px;border-radius:18px;display:inline-block}
-    .hide{display:none!important}
-    .notice{font-size:12px;color:var(--muted);line-height:1.45}
-    .progress{height:10px;background:#18304a;border-radius:99px;overflow:hidden}
-    .progress > div{height:100%;background:var(--blue);width:0%}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#031427">
+<link rel="manifest" href="manifest.json">
+<title>DriverScan</title>
+<style>
+:root{--bg:#031427;--card:#113052;--line:#2f557d;--blue:#2684ff;--green:#54d98c;--orange:#ffad2f;--muted:#a9b7c9}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(#031427,#06182c);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:520px;margin:auto;min-height:100vh;padding-bottom:94px}.screen{display:none;padding:18px}.screen.active{display:block}
+h1{font-size:34px;margin:12px 0}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:16px;margin-top:16px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}.muted{color:var(--muted)}.good{color:var(--green)}.warn{color:var(--orange)}
+button,input{font:inherit}.btn{width:100%;border:0;border-radius:16px;padding:16px;margin-top:10px;background:var(--blue);color:#fff;font-weight:700}
+.btn.secondary{background:#1b3f66}.input{width:100%;border-radius:15px;padding:15px;background:#061a2f;color:#fff;border:1px solid #3a5c7f;margin-top:10px}
+video{width:100%;aspect-ratio:3/4;object-fit:cover;background:#000;border-radius:22px}.wrap{position:relative}.frame{position:absolute;left:14%;right:14%;top:38%;height:24%;border:4px solid #fff;border-left-width:0;border-right-width:0;pointer-events:none}
+.item{padding:12px 0;border-bottom:1px solid #2b4b6d}.item:last-child{border-bottom:0}.pill{background:#173b63;padding:8px 12px;border-radius:999px}
+.nav{position:fixed;left:0;right:0;bottom:0;background:#031325;border-top:1px solid #28435f;padding:10px 8px calc(10px + env(safe-area-inset-bottom));z-index:5}
+.navin{max-width:520px;margin:auto;display:flex;justify-content:space-around}.nav button{background:none;border:0;color:#a9b7c9}.nav button.active{color:#4da0ff}
+.progress{height:10px;background:#1b3d60;border-radius:99px;overflow:hidden;margin:12px 0}.progress>div{height:100%;background:var(--blue);width:0}
+</style>
 </head>
 <body>
 <div class="app">
 
-  <section id="login" class="screen active">
-    <div class="hero">
-      <div style="font-size:64px">📦</div>
-      <div class="brand">DriverScan</div>
-      <p class="muted">Delivery order scanning prototype</p>
-    </div>
-    <div class="card stack">
-      <input id="email" class="input" type="email" placeholder="Email" autocomplete="email"/>
-      <input id="password" class="input" type="password" placeholder="Password" autocomplete="current-password"/>
-      <button class="btn" onclick="login()">Log In</button>
-      <div class="notice">Prototype login: enter any non-empty email and password.</div>
-    </div>
-  </section>
+<section id="login" class="screen active">
+  <div style="text-align:center;padding-top:70px"><div style="font-size:60px">📦</div><h1>DriverScan</h1><p class="muted">Delivery order scanning prototype</p></div>
+  <div class="card">
+    <input id="email" class="input" type="email" placeholder="Email">
+    <input id="password" class="input" type="password" placeholder="Password">
+    <button class="btn" onclick="login()">Log In</button>
+    <p class="muted">Prototype login: enter any non-empty email and password.</p>
+  </div>
+</section>
 
-  <section id="home" class="screen">
-    <div class="top"><div class="brand">DriverScan</div><span class="pill">● Online</span></div>
-    <div class="title">Ready to deliver?</div>
-    <div class="card">
-      <div class="row"><b>Active Order</b><span class="pill" id="orderNo1"></span></div>
-      <h3 id="store1"></h3><div class="muted" id="addr1"></div>
-      <div class="row" style="margin-top:14px">
-        <span>🛍 <span id="itemCount1"></span> items</span>
-        <b id="total1"></b>
-      </div>
-      <button class="btn" style="margin-top:15px" onclick="showScreen('scan')">Continue Order</button>
-    </div>
-    <div class="row">
-      <div class="metric"><b id="scanMetric">0/0</b><div class="small">Scanned</div></div>
-      <div class="metric"><b id="totalMetric">$0.00</b><div class="small">Total</div></div>
-    </div>
-  </section>
+<section id="home" class="screen">
+  <h1>Home</h1>
+  <div class="card">
+    <div class="row"><b>Active Order</b><span class="pill" id="homeCount"></span></div>
+    <h2>Demo Market</h2><div class="muted">123 Main Street</div>
+    <button class="btn" onclick="show('scan')">Continue Order</button>
+  </div>
+</section>
 
-  <section id="orders" class="screen">
-    <div class="top"><div class="title">Orders</div><span class="pill">Current</span></div>
-    <div class="card">
-      <div class="row"><b id="store2"></b><span id="orderNo2" class="pill"></span></div>
-      <div class="muted" id="addr2"></div>
-      <div id="orderItems"></div>
-    </div>
-  </section>
+<section id="orders" class="screen">
+  <h1>Orders</h1>
+  <div class="card" id="orderList"></div>
+</section>
 
-  <section id="scan" class="screen">
-    <div class="top"><div class="title">Scan Items</div><span class="pill" id="scanCount">0/0</span></div>
-    <div id="reader"></div>
-    <div class="card">
-      <div id="scanMessage" class="muted">Tap “Start Camera” and allow camera access.</div><div class="notice" style="margin-top:8px">For UPC barcodes: use the rear camera, avoid glare, and keep the entire barcode inside the white box.</div>
-      <div class="progress" style="margin:14px 0"><div id="progressBar"></div></div>
-      <div class="row">
-        <button id="startCam" class="btn" onclick="startScanner()">Start Camera</button>
-        <button id="stopCam" class="btn secondary hide" onclick="stopScanner()">Stop</button>
-      </div>
-      <input id="manualCode" class="input" style="margin-top:12px" placeholder="Or enter barcode manually"/>
-      <button class="btn secondary" style="margin-top:10px" onclick="manualScan()">Check Barcode</button>
-      <button id="reviewBtn" class="btn good" style="margin-top:10px" onclick="showScreen('review')" disabled>Review Order</button>
-    </div>
-  </section>
+<section id="scan" class="screen">
+  <div class="row"><h1>Scan Items</h1><span class="pill" id="scanCount"></span></div>
+  <div class="wrap"><video id="video" playsinline muted></video><div class="frame"></div></div>
+  <div class="card">
+    <div id="status" class="muted">Tap Start Scanner, then allow camera access.</div>
+    <div class="progress"><div id="bar"></div></div>
+    <button id="start" class="btn">Start Scanner</button>
+    <button id="stop" class="btn secondary">Stop</button>
+    <input id="manual" class="input" inputmode="numeric" placeholder="Or enter barcode manually">
+    <button id="manualBtn" class="btn secondary">Check Barcode</button>
+  </div>
+</section>
 
-  <section id="review" class="screen">
-    <div class="top"><div class="title">Review</div><span class="pill">Step 3</span></div>
-    <div class="card">
-      <div class="row"><span>Order</span><b id="orderNo3"></b></div>
-      <div class="row"><span>Store</span><b id="store3"></b></div>
-      <div class="row"><span>Verified</span><b id="verified3"></b></div>
-      <div class="row"><span>Total</span><b id="total3"></b></div>
-    </div>
-    <div class="card" id="reviewItems"></div>
-    <button id="verifyBtn" class="btn good" onclick="showVerification()" disabled>Open Order Verification</button>
-    <p class="notice">Verification becomes available only after every item in this demo order is scanned.</p>
-  </section>
-
-  <section id="verify" class="screen">
-    <div class="hero">
-      <div class="check">✓</div>
-      <div class="title">Order Verified</div>
-      <div class="muted">DriverScan Order Verification</div>
-    </div>
-    <div class="card">
-      <div class="row"><span>Order</span><b id="vOrder"></b></div>
-      <div class="row"><span>Items</span><b id="vItems"></b></div>
-      <div class="row"><span>Status</span><b class="good">Verified</b></div>
-      <div class="row"><span>Total</span><b id="vTotal"></b></div>
-    </div>
-    <div style="text-align:center">
-      <div class="qrwrap"><div id="qrcode"></div></div>
-      <p><b>IN-APP ORDER VERIFICATION</b></p>
-      <p class="notice">This code identifies the order inside this prototype. It is not a retailer-issued receipt, payment authorization, or store exit pass.</p>
-    </div>
-  </section>
-
-  <section id="profile" class="screen">
-    <div class="title">Profile</div>
-    <div class="card"><b>DriverScan Web</b><p class="muted">iPhone Safari / Home Screen app</p></div>
-    <button class="btn secondary" onclick="logout()">Log Out</button>
-  </section>
+<section id="profile" class="screen">
+  <h1>Profile</h1>
+  <div class="card"><b>DriverScan Prototype</b><p class="muted">Order-aware barcode scanning</p></div>
+  <button class="btn secondary" onclick="logout()">Log Out</button>
+</section>
 
 </div>
 
-<div id="nav" class="nav hide">
+<div id="nav" class="nav" style="display:none">
   <div class="navin">
-    <button data-screen="home" onclick="showScreen('home')"><span class="ico">⌂</span>Home</button>
-    <button data-screen="orders" onclick="showScreen('orders')"><span class="ico">☷</span>Orders</button>
-    <button data-screen="scan" onclick="showScreen('scan')"><span class="ico">▣</span>Scan</button>
-    <button data-screen="profile" onclick="showScreen('profile')"><span class="ico">◉</span>Profile</button>
+    <button data-id="home" onclick="show('home')">⌂<br>Home</button>
+    <button data-id="orders" onclick="show('orders')">☷<br>Orders</button>
+    <button data-id="scan" onclick="show('scan')">▣<br>Scan</button>
+    <button data-id="profile" onclick="show('profile')">◉<br>Profile</button>
   </div>
 </div>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script>
-const order = {
-  orderNumber:"ORD-10042",
-  storeName:"Demo Market",
-  address:"123 Main Street",
+const order={
+  id:"ORD-10042",
   items:[
-    {name:"Cheese Crackers",size:"7 oz",barcode:"024100210217",qty:1,price:2.98,scanned:false},
-    {name:"Purified Water",size:"24 pack",barcode:"049000042566",qty:1,price:4.58,scanned:false},
-    {name:"Laundry Detergent",size:"92 fl oz",barcode:"037000138782",qty:1,price:11.97,scanned:false}
+    {name:"Fresh Produce Item",barcode:"076737311597",qty:1,scanned:false},
+    {name:"Cheese Crackers",barcode:"024100210217",qty:1,scanned:false},
+    {name:"Purified Water",barcode:"049000042566",qty:1,scanned:false}
   ]
 };
 
-let html5QrCode = null;
-let scannerRunning = false;
-const money = n => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);
-const total = () => order.items.reduce((s,i)=>s+i.price*i.qty,0);
-const scannedCount = () => order.items.filter(i=>i.scanned).length;
-const complete = () => scannedCount() === order.items.length;
+let zxing=null;
+const video=document.getElementById('video');
+const statusEl=document.getElementById('status');
 
+function count(){return order.items.filter(x=>x.scanned).length}
+function refresh(){
+  scanCount.textContent=`${count()}/${order.items.length}`;
+  homeCount.textContent=`${count()}/${order.items.length} scanned`;
+  bar.style.width=`${(count()/order.items.length)*100}%`;
+  orderList.innerHTML=order.items.map(x=>`
+    <div class="item row">
+      <div><b>${x.scanned?'✅':'○'} ${x.name}</b><div class="muted">${x.barcode}</div></div>
+      <div>Qty ${x.qty}</div>
+    </div>`).join('');
+}
+
+function handleBarcode(code){
+  code=(code||'').replace(/\D/g,'');
+  const item=order.items.find(x=>x.barcode===code);
+  if(item){
+    const wasScanned=item.scanned;
+    item.scanned=true;
+    statusEl.innerHTML=`<span class="good"><b>${wasScanned?'Already scanned':'Correct item found'}</b><br>${item.name}<br>${code}</span>`;
+    navigator.vibrate?.(100);
+  }else{
+    statusEl.innerHTML=`<span class="warn"><b>Barcode not found in this order.</b><br>${code}</span>`;
+  }
+  refresh();
+}
+
+async function startScanner(){
+  try{
+    stopScanner();
+    zxing=new ZXing.BrowserMultiFormatReader();
+    statusEl.textContent='Starting rear camera…';
+    await zxing.decodeFromConstraints(
+      {video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}},
+      video,
+      (res,err)=>{
+        if(res){
+          handleBarcode(res.getText());
+          stopScanner(false);
+        }
+      }
+    );
+    statusEl.textContent='Camera ready. Center the barcode in the frame.';
+  }catch(e){
+    statusEl.innerHTML=`<span class="warn">Scanner error: ${e.message}</span>`;
+  }
+}
+function stopScanner(changeText=true){
+  if(zxing){try{zxing.reset()}catch(e){} zxing=null}
+  if(changeText && statusEl) statusEl.textContent='Scanner stopped.';
+}
 function login(){
-  if(!email.value.trim() || !password.value.trim()) return;
-  localStorage.setItem("driverscan_logged","1");
-  document.getElementById("nav").classList.remove("hide");
-  showScreen("home");
+  if(email.value.trim() && password.value.trim()){
+    localStorage.setItem('driverscan-login','1');
+    nav.style.display='block';show('home');
+  }
 }
 function logout(){
-  stopScanner();
-  localStorage.removeItem("driverscan_logged");
-  document.getElementById("nav").classList.add("hide");
-  showScreen("login");
+  localStorage.removeItem('driverscan-login');nav.style.display='none';show('login');
 }
-function showScreen(id){
-  if(id !== "scan") stopScanner();
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.screen===id));
+function show(id){
+  if(id!=='scan') stopScanner(false);
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.id===id));
   refresh();
 }
-function refresh(){
-  orderNo1.textContent=order.orderNumber; orderNo2.textContent=order.orderNumber; orderNo3.textContent=order.orderNumber;
-  store1.textContent=order.storeName; store2.textContent=order.storeName; store3.textContent=order.storeName;
-  addr1.textContent=order.address; addr2.textContent=order.address;
-  itemCount1.textContent=order.items.length; total1.textContent=money(total());
-  scanMetric.textContent=`${scannedCount()}/${order.items.length}`; totalMetric.textContent=money(total());
-  scanCount.textContent=`${scannedCount()}/${order.items.length}`;
-  progressBar.style.width=`${Math.round(scannedCount()/order.items.length*100)}%`;
-  verified3.textContent=`${scannedCount()}/${order.items.length}`; total3.textContent=money(total());
 
-  orderItems.innerHTML=order.items.map(i=>`<div class="item row"><div><b>${i.scanned?"✅":"○"} ${i.name}</b><div class="small">${i.size} • Qty ${i.qty}</div></div><b>${money(i.price)}</b></div>`).join("");
-  reviewItems.innerHTML=order.items.map(i=>`<div class="item">${i.scanned?"✅":"⚠️"} ${i.name}</div>`).join("");
-  reviewBtn.disabled = scannedCount()===0;
-  verifyBtn.disabled = !complete();
-}
-function handleCode(code){
-  const item=order.items.find(i=>i.barcode===code);
-  if(item){
-    item.scanned=true;
-    scanMessage.innerHTML=`<span class="good"><b>Correct item scanned:</b> ${item.name}</span>`;
-    if(navigator.vibrate) navigator.vibrate(80);
-  }else{
-    scanMessage.innerHTML=`<span class="warn"><b>Barcode not found in this order.</b><br>${code}</span>`;
-  }
-  refresh();
-}
-async function startScanner(){
-  if(scannerRunning) return;
-
-  if(!window.Html5Qrcode){
-    scanMessage.innerHTML='<span class="warn">Scanner library could not load. Check your internet connection and reopen the app.</span>';
-    return;
-  }
-
-  const supportedFormats = [
-    Html5QrcodeSupportedFormats.UPC_A,
-    Html5QrcodeSupportedFormats.UPC_E,
-    Html5QrcodeSupportedFormats.EAN_8,
-    Html5QrcodeSupportedFormats.EAN_13,
-    Html5QrcodeSupportedFormats.CODE_128,
-    Html5QrcodeSupportedFormats.CODE_39,
-    Html5QrcodeSupportedFormats.CODE_93,
-    Html5QrcodeSupportedFormats.ITF,
-    Html5QrcodeSupportedFormats.CODABAR,
-    Html5QrcodeSupportedFormats.QR_CODE
-  ];
-
-  html5QrCode = new Html5Qrcode("reader", {
-    formatsToSupport: supportedFormats,
-    useBarCodeDetectorIfSupported: false
-  });
-
-  try{
-    const boxWidth = Math.max(280, Math.min(window.innerWidth - 70, 420));
-
-    await html5QrCode.start(
-      { facingMode: { exact: "environment" } },
-      {
-        fps: 18,
-        qrbox: { width: boxWidth, height: 150 },
-        aspectRatio: 1.777778,
-        disableFlip: false,
-        experimentalFeatures: {
-          useBarCodeDetectorIfSupported: false
-        }
-      },
-      decodedText => handleCode(decodedText.replace(/\s+/g, "")),
-      () => {}
-    );
-
-    scannerRunning = true;
-    startCam.classList.add("hide");
-    stopCam.classList.remove("hide");
-    scanMessage.textContent="Scanner ready. Hold the barcode flat, fill most of the white box, and keep the phone about 4–8 inches away.";
-
-    // Ask iPhone Safari for continuous focus when the browser allows it.
-    try{
-      await html5QrCode.applyVideoConstraints({
-        advanced: [{ focusMode: "continuous" }]
-      });
-    }catch(e){
-      // Some iPhone/Safari versions do not expose manual focus controls.
-    }
-  }catch(e){
-    // Some iPhones reject `exact`; retry with normal rear-camera preference.
-    try{
-      await html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 18,
-          qrbox: { width: Math.max(280, Math.min(window.innerWidth - 70, 420)), height: 150 },
-          aspectRatio: 1.777778,
-          disableFlip: false
-        },
-        decodedText => handleCode(decodedText.replace(/\s+/g, "")),
-        () => {}
-      );
-
-      scannerRunning = true;
-      startCam.classList.add("hide");
-      stopCam.classList.remove("hide");
-      scanMessage.textContent="Scanner ready. Hold the barcode flat, fill most of the white box, and keep the phone about 4–8 inches away.";
-    }catch(secondError){
-      scanMessage.innerHTML='<span class="warn">Camera could not start correctly. Close the Home Screen app, reopen it, and allow Camera access when asked.</span>';
-    }
-  }
-}
-async function stopScanner(){
-  if(html5QrCode && scannerRunning){
-    try{ await html5QrCode.stop(); }catch(e){}
-    try{ await html5QrCode.clear(); }catch(e){}
-  }
-  scannerRunning=false;
-  startCam?.classList.remove("hide"); stopCam?.classList.add("hide");
-}
-function manualScan(){
-  const code=manualCode.value.trim();
-  if(code) handleCode(code);
-  manualCode.value="";
-}
-function showVerification(){
-  if(!complete()) return;
-  showScreen("verify");
-  vOrder.textContent=order.orderNumber;
-  vItems.textContent=order.items.length;
-  vTotal.textContent=money(total());
-  qrcode.innerHTML="";
-  new QRCode(qrcode,{text:`DRIVERSCAN|${order.orderNumber}|VERIFIED`,width:190,height:190});
-}
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js").catch(()=>{});
-}
+document.getElementById('start').onclick=startScanner;
+document.getElementById('stop').onclick=()=>stopScanner();
+document.getElementById('manualBtn').onclick=()=>{if(manual.value.trim())handleBarcode(manual.value.trim());manual.value=''};
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 refresh();
-if(localStorage.getItem("driverscan_logged")==="1"){
-  document.getElementById("nav").classList.remove("hide");
-  showScreen("home");
-}
+if(localStorage.getItem('driverscan-login')==='1'){nav.style.display='block';show('home')}
 </script>
 </body>
 </html>
