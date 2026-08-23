@@ -1,9 +1,1 @@
-{
-  "name": "DriverScan",
-  "short_name": "DriverScan",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#061426",
-  "theme_color": "#061426",
-  "icons": []
-}
+{"name":"DriverScan Prototype","short_name":"DriverScan","start_url":"./index.html","display":"standalone","background_color":"#06182c","theme_color":"#0071dc","icons":[]}
