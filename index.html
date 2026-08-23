@@ -68,10 +68,9 @@
 </section>
 
 <section id="trips" class="screen"><div class="pageHead"><h1>Trips</h1></div><div class="page"><div class="card"><b>Active Order</b><p class="muted">Demo Market • 3 items</p><button class="btn" onclick="show('scan')">Scan Items</button></div></div></section>
-<section id="earnings" class="screen"><div class="pageHead"><h1>Earnings</h1></div><div class="page"><div class="card"><b>Today</b><h2>$0.00</h2><p class="muted">Demo earnings view</p></div></div></section>
+<section id="earnings" class="screen"><div class="pageHead"><h1>Earnings</h1></div><div class="page"><div class="card"><b>Today</b><h2>$0.00</h2></div></div></section>
 <section id="notifications" class="screen"><div class="pageHead"><h1>Notifications</h1></div><div class="page"><div class="card">No new notifications.</div></div></section>
 <section id="more" class="screen"><div class="pageHead"><h1>More</h1></div><div class="page"><div class="card"><b>DriverScan</b><p class="muted">Nearby-store finder + barcode scanner</p></div></div></section>
-
 <section id="scan" class="screen">
   <div class="pageHead"><h1>Scan Items</h1></div>
   <div class="page">
@@ -99,14 +98,8 @@
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script>
 let map,userMarker,watchId,reader=null,userPos=null;
-let storeMarkers=[],storeResults=[];
-let searchInFlight=false,lastSearchPos=null,lastSearchAt=0;
+let storeMarkers=[],storeResults=[],searchInFlight=false;
 const fallback=[42.3314,-83.0458];
-const endpoints=[
-  'https://overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass.nchc.org.tw/api/interpreter'
-];
 
 function initMap(){
   map=L.map('map',{zoomControl:false}).setView(fallback,12);
@@ -119,26 +112,17 @@ function requestLocation(){
   const label=document.getElementById('locationLabel');
   if(!navigator.geolocation){label.textContent='Location unavailable';return}
   if(watchId) navigator.geolocation.clearWatch(watchId);
-
-  let firstFix=true;
+  let first=true;
   watchId=navigator.geolocation.watchPosition(
     pos=>{
       const lat=pos.coords.latitude,lon=pos.coords.longitude;
       userPos={lat,lon};
       userMarker.setLatLng([lat,lon]);
       label.textContent='Live location';
-
-      // Follow live location, but don't constantly restart the store search.
-      if(firstFix){
-        firstFix=false;
+      if(first){
+        first=false;
         map.setView([lat,lon],13);
-        stableSearch(lat,lon,true);
-      }else{
-        // Only search again automatically after moving about 1 mile and at least 5 minutes.
-        if(lastSearchPos && Date.now()-lastSearchAt>300000){
-          const moved=milesBetween(lastSearchPos.lat,lastSearchPos.lon,lat,lon);
-          if(moved>=1) stableSearch(lat,lon,false);
-        }
+        findStores(lat,lon);
       }
     },
     err=>{
@@ -156,124 +140,130 @@ function milesBetween(lat1,lon1,lat2,lon2){
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
-async function stableSearch(lat,lon,force){
-  if(searchInFlight) return;
-  if(!force && lastSearchPos){
-    const moved=milesBetween(lastSearchPos.lat,lastSearchPos.lon,lat,lon);
-    if(moved<0.5 && Date.now()-lastSearchAt<300000) return;
+async function nominatimSearch(lat,lon){
+  // About +/- 0.35 degrees: broad enough for Detroit-area suburb searches.
+  const dLat=0.35, dLon=0.45;
+  const left=lon-dLon, right=lon+dLon, top=lat+dLat, bottom=lat-dLat;
+  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=25&bounded=1&addressdetails=1'
+    +'&q='+encodeURIComponent('Walmart')
+    +'&viewbox='+encodeURIComponent(`${left},${top},${right},${bottom}`);
+  const r=await fetch(url,{headers:{'Accept':'application/json'},cache:'no-store'});
+  if(!r.ok) throw new Error('Place search failed');
+  const data=await r.json();
+  return data.map(x=>({
+    name:(x.name||x.display_name?.split(',')[0]||'Walmart'),
+    address:x.display_name||'Address not listed',
+    lat:Number(x.lat),lon:Number(x.lon)
+  })).filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon));
+}
+
+async function overpassFallback(lat,lon){
+  const radius=40000;
+  const q=`[out:json][timeout:20];(
+    nwr(around:${radius},${lat},${lon})["brand"="Walmart"];
+    nwr(around:${radius},${lat},${lon})["name"~"Walmart",i];
+    nwr(around:${radius},${lat},${lon})["operator"~"Walmart",i];
+  );out center tags;`;
+  const endpoints=[
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://overpass-api.de/api/interpreter'
+  ];
+  for(const endpoint of endpoints){
+    try{
+      const c=new AbortController();
+      const t=setTimeout(()=>c.abort(),12000);
+      const r=await fetch(endpoint+'?data='+encodeURIComponent(q),{signal:c.signal,cache:'no-store'});
+      clearTimeout(t);
+      if(!r.ok) continue;
+      const d=await r.json();
+      const arr=d.elements.map(el=>{
+        const slat=el.lat??el.center?.lat, slon=el.lon??el.center?.lon;
+        if(slat==null||slon==null)return null;
+        const name=el.tags?.name||'Walmart';
+        const street=[el.tags?.['addr:housenumber'],el.tags?.['addr:street']].filter(Boolean).join(' ');
+        const city=el.tags?.['addr:city']||'',state=el.tags?.['addr:state']||'';
+        return {name,address:[street,[city,state].filter(Boolean).join(', ')].filter(Boolean).join(' • '),lat:slat,lon:slon};
+      }).filter(Boolean);
+      if(arr.length)return arr;
+    }catch(e){}
   }
+  return [];
+}
 
+async function findStores(lat,lon){
+  if(searchInFlight)return;
   searchInFlight=true;
-  lastSearchPos={lat,lon};
-  lastSearchAt=Date.now();
-
   const label=document.getElementById('findingLabel');
   const stores=document.getElementById('stores');
   label.textContent='🛒 Finding Walmarts...';
-
-  // Keep prior results visible while refreshing to stop screen flicker.
-  if(!storeResults.length){
-    stores.innerHTML='<div class="muted" style="padding:12px 0">Searching nearby stores…</div>';
-  }
-
-  const radius=30000;
-  const query=`[out:json][timeout:18];(
-    nwr(around:${radius},${lat},${lon})["brand"="Walmart"];
-    nwr(around:${radius},${lat},${lon})["name"~"Walmart",i];
-  );out center tags;`;
-
-  let data=null,lastErr=null;
-  for(const endpoint of endpoints){
-    try{
-      const controller=new AbortController();
-      const timeout=setTimeout(()=>controller.abort(),12000);
-      const r=await fetch(endpoint+'?data='+encodeURIComponent(query),{signal:controller.signal,cache:'no-store'});
-      clearTimeout(timeout);
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      data=await r.json();
-      break;
-    }catch(e){lastErr=e}
-  }
+  stores.innerHTML='<div class="muted" style="padding:12px 0">Searching nearby stores…</div>';
 
   try{
-    if(!data) throw lastErr||new Error('No search response');
+    let results=[];
+    try{results=await nominatimSearch(lat,lon)}catch(e){}
+    if(!results.length) results=await overpassFallback(lat,lon);
 
-    storeMarkers.forEach(m=>map.removeLayer(m)); storeMarkers=[];
     const seen=new Set();
-    const results=data.elements.map(el=>{
-      const slat=el.lat??el.center?.lat, slon=el.lon??el.center?.lon;
-      if(slat==null||slon==null) return null;
-      const name=el.tags?.name||'Walmart';
-      const street=[el.tags?.['addr:housenumber'],el.tags?.['addr:street']].filter(Boolean).join(' ');
-      const city=el.tags?.['addr:city']||'', state=el.tags?.['addr:state']||'';
-      const address=[street,[city,state].filter(Boolean).join(', ')].filter(Boolean).join(' • ');
-      const distance=milesBetween(lat,lon,slat,slon);
-      const key=slat.toFixed(5)+'|'+slon.toFixed(5);
-      if(seen.has(key)) return null; seen.add(key);
-      return {name,address,lat:slat,lon:slon,distance};
-    }).filter(Boolean).sort((a,b)=>a.distance-b.distance).slice(0,10);
+    results=results.map(s=>({
+      ...s,
+      distance:milesBetween(lat,lon,s.lat,s.lon)
+    })).filter(s=>{
+      const key=s.lat.toFixed(4)+'|'+s.lon.toFixed(4);
+      if(seen.has(key))return false;
+      seen.add(key);return true;
+    }).sort((a,b)=>a.distance-b.distance).slice(0,12);
 
+    storeMarkers.forEach(m=>map.removeLayer(m));storeMarkers=[];
     storeResults=results;
     document.getElementById('storeCount').textContent=results.length?`${results.length} found`:'';
-    label.textContent=results.length?`🛒 ${results.length} Walmarts nearby`:'🛒 No nearby Walmart found';
 
     if(!results.length){
-      stores.innerHTML='<div class="muted" style="padding:12px 0">No Walmart locations found in this search area.</div>';
-    }else{
-      stores.innerHTML=results.map((s,i)=>`
-        <div class="storeCard" onclick="focusStore(${i})">
-          <div class="row">
-            <div><b>${escapeHtml(s.name)}</b><div class="address">${escapeHtml(s.address||'Address not listed')}</div></div>
-            <div class="distance">${s.distance.toFixed(1)} mi</div>
-          </div>
-        </div>`).join('');
+      label.textContent='🛒 No nearby Walmart found';
+      stores.innerHTML='<div class="muted" style="padding:12px 0">No Walmart locations were returned in this search area. Tap SPARK NOW to retry.</div>';
+      return;
+    }
 
-      results.forEach((s,i)=>{
-        storeMarkers.push(
-          L.marker([s.lat,s.lon]).addTo(map)
-           .bindPopup(`<b>${escapeHtml(s.name)}</b><br>${s.distance.toFixed(1)} mi away`)
-        );
-      });
-    }
+    label.textContent=`🛒 ${results.length} Walmarts nearby`;
+    stores.innerHTML=results.map((s,i)=>`
+      <div class="storeCard" onclick="focusStore(${i})">
+        <div class="row">
+          <div><b>${escapeHtml(s.name)}</b><div class="address">${escapeHtml(s.address)}</div></div>
+          <div class="distance">${s.distance.toFixed(1)} mi</div>
+        </div>
+      </div>`).join('');
+
+    results.forEach((s,i)=>{
+      storeMarkers.push(
+        L.marker([s.lat,s.lon]).addTo(map)
+          .bindPopup(`<b>${escapeHtml(s.name)}</b><br>${s.distance.toFixed(1)} mi away`)
+      );
+    });
   }catch(e){
-    // Do not erase good results if the public lookup service temporarily fails.
-    if(storeResults.length){
-      label.textContent=`🛒 ${storeResults.length} Walmarts nearby`;
-    }else{
-      label.textContent='🛒 Store search unavailable';
-      stores.innerHTML='<div class="muted" style="padding:12px 0">Nearby-store service is temporarily unavailable. Tap SPARK NOW to retry.</div>';
-    }
-  }finally{
-    searchInFlight=false;
-  }
+    label.textContent='🛒 Store search unavailable';
+    stores.innerHTML='<div class="muted" style="padding:12px 0">Store lookup failed. Tap SPARK NOW to retry.</div>';
+  }finally{searchInFlight=false}
 }
 
 function focusStore(i){
-  const s=storeResults[i];
-  if(!s)return;
-  map.setView([s.lat,s.lon],15);
-  storeMarkers[i]?.openPopup();
+  const s=storeResults[i];if(!s)return;
+  map.setView([s.lat,s.lon],15);storeMarkers[i]?.openPopup();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 
-document.getElementById('sparkNow').onclick=()=>{
-  if(userPos) stableSearch(userPos.lat,userPos.lon,true);
-  else requestLocation();
-};
+document.getElementById('sparkNow').onclick=()=>userPos?findStores(userPos.lat,userPos.lon):requestLocation();
 
 function show(id){
-  if(id!=='scan') stopScanner(false);
+  if(id!=='scan')stopScanner(false);
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   window.scrollTo(0,0);
-  if(id==='home') setTimeout(()=>map&&map.invalidateSize(),100);
+  if(id==='home')setTimeout(()=>map&&map.invalidateSize(),100);
 }
 async function startScanner(){
   try{
-    stopScanner(false);
-    reader=new ZXing.BrowserMultiFormatReader();
+    stopScanner(false);reader=new ZXing.BrowserMultiFormatReader();
     document.getElementById('scanStatus').textContent='Starting rear camera…';
     await reader.decodeFromConstraints(
       {video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}},
@@ -286,12 +276,9 @@ async function startScanner(){
 function stopScanner(msg=true){if(reader){try{reader.reset()}catch(e){}reader=null}if(msg)document.getElementById('scanStatus').textContent='Scanner stopped.'}
 document.getElementById('startScan').onclick=startScanner;
 document.getElementById('stopScan').onclick=()=>stopScanner();
-document.getElementById('manualBtn').onclick=()=>{
-  const v=document.getElementById('manual').value.trim();
-  if(v)document.getElementById('scanStatus').textContent='Barcode: '+v;
-};
-
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+document.getElementById('manualBtn').onclick=()=>{const v=document.getElementById('manual').value.trim();if(v)document.getElementById('scanStatus').textContent='Barcode: '+v};
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 window.addEventListener('load',initMap);
 </script>
-</body></html>
+</body>
+</html>
