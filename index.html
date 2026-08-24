@@ -197,7 +197,7 @@ display:flex;align-items:center;justify-content:center;color:#657084;font-weight
 </style>
 </head>
 <body>
-<div style="position:fixed;right:8px;top:8px;z-index:9999;background:#111;color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;opacity:.7">Build REVIEW PAY v11</div>
+<div style="position:fixed;right:8px;top:8px;z-index:9999;background:#111;color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;opacity:.7">Build REVIEW PAY v12</div>
 <div class="app">
 <section id="home" class="screen active">
   <div class="mapWrap">
@@ -472,23 +472,21 @@ display:flex;align-items:center;justify-content:center;color:#657084;font-weight
 
     <div class="rpCard">
       <div class="rpSectionHead"><span>PAYMENT METHOD</span><span></span></div>
-      <div class="demoNotice">DEMO PAYMENT OPTIONS — no card is charged and no real payment is processed.</div>
+      <div class="demoNotice">Prototype checkout — no real payment is processed.</div>
       <div class="payOption selected">
         <div class="payRadio"></div>
-        <div><div class="payName">DriverScan Demo Card</div><div class="paySub">•••• 4242 • Prototype only</div></div>
+        <div><div class="payName">DriverScan Card</div><div class="paySub">•••• 4242</div></div>
         <div id="rpPayAmount" class="payAmount">$0.00</div>
       </div>
-      <div class="payOption" style="opacity:.75">
-        <div style="width:18px;height:18px;border:2px solid #9aa3af;border-radius:50%"></div>
-        <div><div class="payName">Apple Pay</div><div class="paySub">Not connected in this demo</div></div>
+      </div>
         <div>›</div>
       </div>
     </div>
 
     <div class="rpCard">
       <div class="rpTotal"><span>ORDER TOTAL <small style="font-weight:500;color:#7a8492">(Estimated)</small></span><strong id="rpTotal">$0.00</strong></div>
-      <div class="demoSecure">🛡 Demo checkout only. No payment or retailer authorization is created.</div>
-      <button class="rpContinue" onclick="goToVerifiedDone()">PROCEED TO DEMO CHECKOUT SUMMARY ›</button>
+      <div class="demoSecure">Prototype — no real payment is processed.</div>
+      <button class="rpContinue" onclick="goToVerifiedDone()">CONTINUE ›</button>
     </div>
   </div>
 </section>
