@@ -18,6 +18,12 @@
 .sparkBtn{width:100%;border:0;border-radius:14px;padding:19px;background:linear-gradient(90deg,#1475f4,#0864e7);color:white;font-size:20px;font-weight:900;letter-spacing:2px}
 .offerCard{margin-top:18px;background:#f5f6f8;border-radius:14px;padding:16px;display:flex;gap:13px;align-items:flex-start}
 .offerCard b{display:block;font-size:18px;margin-bottom:4px}.offerCard p{margin:0;color:#7b8491;line-height:1.45}
+.liveOffer{background:#fff;border:1px solid #e1e6ed;border-radius:16px;margin-bottom:16px;box-shadow:0 2px 10px rgba(12,35,64,.08);overflow:hidden}
+.liveOfferHead{background:#eaf6ff;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.liveOfferHead strong{font-size:22px;color:#143f78}.offerTimer{width:62px;height:62px;border:5px solid #17478f;border-top-color:#afcbe8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#17478f;font-variant-numeric:tabular-nums}
+.liveOfferBody{padding:17px}.offerPay{font-size:30px;font-weight:900;margin-bottom:6px}.offerMeta{font-size:17px;font-weight:750;margin:5px 0}.offerStore{font-size:17px;font-weight:850;margin-top:18px}.offerTag{display:inline-block;background:#fff6cf;border:1px solid #ead272;border-radius:5px;padding:4px 8px;margin:18px 6px 0 0;font-weight:750;font-size:13px}
+.offerActions{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 17px 17px}.offerReject,.offerAccept{border:0;border-radius:999px;padding:15px;font-size:17px;font-weight:850}.offerReject{background:#eef0f3;color:#21416b}.offerAccept{background:#17478f;color:#fff}
+#offers .page>.card{display:none}
 .storeList{margin-top:18px}.storeCard{border:1px solid #e4e8ee;border-radius:14px;padding:14px;margin-top:10px;background:#fff}
 .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.distance{color:#1677f2;font-weight:800;white-space:nowrap}.address{color:#717b89;margin-top:5px;font-size:14px}.small{font-size:12px;color:#8a93a0}
 .section{padding:18px 0 0}.sectionHead{display:flex;justify-content:space-between;align-items:center}.sectionHead h2{font-size:20px;margin:0}.section p{color:#6f7783;margin:6px 0 20px}
@@ -448,8 +454,8 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
 
 <section id="offers" class="screen">
   <div class="pageHead">
-    <h1 style="margin-bottom:4px">Nearby Demo Offers</h1>
-    <div style="opacity:.8">Test offers generated from nearby Walmart locations</div>
+    <h1 style="margin-bottom:4px">Nearby Offers</h1>
+    <div style="opacity:.8">Choose an offer before the timer runs out</div>
   </div>
   <div class="page">
     
@@ -1048,42 +1054,75 @@ document.getElementById('sparkNow').onclick=async()=>{
     try{ await findStores(userPos.lat,userPos.lon); }catch(e){}
   }else{
     requestLocation();
+    await new Promise(resolve=>{
+      let tries=0;
+      const waiting=setInterval(()=>{
+        if(userPos||++tries>=30){clearInterval(waiting);resolve()}
+      },500);
+    });
+    if(userPos && !storeResults.length){
+      try{await findStores(userPos.lat,userPos.lon)}catch(e){}
+    }
   }
-  renderOrderSummary();
-  show('orderSummary');
+  renderDemoOffers();
+  show('offers');
 };
+
+let offerCountdownInterval=null;
+let offerExpiresAt=0;
 
 function renderDemoOffers(){
   const box=document.getElementById('offerCards');
+  clearInterval(offerCountdownInterval);
   if(!storeResults.length){
     box.innerHTML='<div class="card"><b>No nearby stores loaded</b><p class="muted">Return Home, allow location access, and tap SPARK NOW again.</p></div>';
     return;
   }
-  const pays=[18,22,15,27,20,24,17,30,19,25,21,16];
-  const items=[4,9,2,13,6,8,3,15,5,11,7,1];
-  const types=['Curbside Pickup','Pickup','Curbside Pickup','Pickup'];
-  box.innerHTML=storeResults.slice(0,8).map((s,i)=>`
-    <div class="card">
-      <div class="row">
-        <div>
-          <div style="font-size:12px;font-weight:900;color:#9a6a00;letter-spacing:.5px">DEMO OFFER</div>
-          <h2 style="margin:4px 0 2px">${escapeHtml(s.name)}</h2>
-          <div class="muted">${s.distance.toFixed(1)} mi away</div>
-        </div>
-        <div style="background:#e9f4ff;color:#0864c9;padding:7px 10px;border-radius:999px;font-weight:800;font-size:12px">TEST</div>
-      </div>
-      <div style="margin:20px 0 8px;font-size:28px;font-weight:900">$${pays[i%pays.length]}.00 <span class="muted" style="font-size:14px;font-weight:500">demo earnings</span></div>
-      <div class="muted">${types[i%types.length]} • ${items[i%items.length]} items</div>
-      <div class="muted" style="margin-top:5px">Test window: ${i%2?'3:00 PM – 5:00 PM':'2:00 PM – 4:00 PM'}</div>
-      <button class="btn" onclick="acceptDemoOffer(${i})">Accept Demo Offer</button>
-    </div>`).join('');
+  const s=storeResults[Math.floor(Math.random()*Math.min(storeResults.length,5))];
+  const i=storeResults.indexOf(s);
+  const pay=(18+Math.random()*14).toFixed(2);
+  const miles=Math.max(1.8,s.distance+2.4+Math.random()*7).toFixed(1);
+  const mins=Math.round(28+Math.random()*35);
+  const stops=Math.random()>.55?2:1;
+  const pickup=new Date(Date.now()+25*60000).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  box.innerHTML=`<div class="liveOffer" id="activeOffer">
+    <div class="liveOfferHead"><strong>Just for you</strong><div class="offerTimer" id="offerTimer">2:00</div></div>
+    <div class="liveOfferBody">
+      <div class="offerPay">$${pay} <span class="muted" style="font-size:15px;font-weight:600">estimate</span></div>
+      <div class="offerMeta">${stops} ${stops===1?'stop':'stops'} • ${miles} miles • ${mins} mins</div>
+      <div class="offerStore">${pickup} • Shopping</div>
+      <div class="muted" style="margin-top:4px">${escapeHtml(s.name)}</div>
+      <div class="offerMeta" style="margin-top:17px">1 drop-off</div>
+      <span class="offerTag">Shopping</span><span class="offerTag">Medium order</span>
+    </div>
+    <div class="offerActions"><button class="offerReject" onclick="rejectOffer()">REJECT</button><button class="offerAccept" onclick="acceptDemoOffer(${i})">ACCEPT</button></div>
+  </div>`;
+  offerExpiresAt=Date.now()+120000;
+  updateOfferCountdown();
+  offerCountdownInterval=setInterval(updateOfferCountdown,250);
+}
+function updateOfferCountdown(){
+  const timer=document.getElementById('offerTimer');
+  if(!timer){clearInterval(offerCountdownInterval);return}
+  const left=Math.max(0,Math.ceil((offerExpiresAt-Date.now())/1000));
+  timer.textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
+  if(left<=0){
+    clearInterval(offerCountdownInterval);
+    const card=document.getElementById('activeOffer');
+    if(card)card.innerHTML='<div class="liveOfferBody" style="text-align:center;padding:34px 20px"><h2>Offer expired</h2><p class="muted">Press Spark Now to find another nearby offer.</p><button class="btn" onclick="show(\'home\')">BACK TO HOME</button></div>';
+  }
+}
+function rejectOffer(){
+  clearInterval(offerCountdownInterval);
+  renderDemoOffers();
 }
 function acceptDemoOffer(i){
+  clearInterval(offerCountdownInterval);
   const s=storeResults[i];
   localStorage.setItem('demoAcceptedStore', JSON.stringify(s||{}));
   show('trips');
   const trip=document.querySelector('#trips .card');
-  if(trip && s) trip.innerHTML='<div style="font-size:12px;font-weight:900;color:#9a6a00">DEMO ACTIVE ORDER</div><h2>'+escapeHtml(s.name)+'</h2><p class="muted">'+s.distance.toFixed(1)+' mi away • Test order</p><button class="btn" onclick="show(\'scan\')">Scan Demo Items</button>';
+  if(trip && s) trip.innerHTML='<div style="font-size:12px;font-weight:900;color:#17478f">ACTIVE ORDER</div><h2>'+escapeHtml(s.name)+'</h2><p class="muted">'+s.distance.toFixed(1)+' mi away • Shopping order</p><button class="btn" onclick="show(\'scan\')">Scan Items</button>';
 }
 
 function show(id){
