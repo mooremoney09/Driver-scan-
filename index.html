@@ -127,10 +127,35 @@
 .verifyDoneBtn{border:0;border-radius:999px;background:#fff;color:#15803d;padding:14px 24px;font-size:18px;font-weight:900}
 .verifyWrong{background:#fee2e2!important;color:#b42318!important}
 
+
+/* Verified checkout demo flow v10 */
+.doneScreen{background:#f7f9fc;min-height:100vh;padding-bottom:110px}
+.doneHero{background:#0f9d58;color:#fff;padding:46px 24px 34px;text-align:center}
+.doneCheck{font-size:74px;line-height:1;margin-bottom:12px}
+.doneHero h1{font-size:30px;margin:0 0 8px}
+.doneHero p{font-size:17px;margin:0;opacity:.95}
+.doneCard{background:#fff;margin:18px;border-radius:18px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.doneCard h2{margin:0 0 10px;font-size:22px}
+.demoNotice{background:#fff4ce;border:1px solid #efd36f;color:#6b5400;border-radius:12px;padding:12px;font-size:13px;font-weight:800;margin-bottom:14px}
+.waitBarcode{height:120px;border-radius:14px;background:
+repeating-linear-gradient(90deg,#d7dbe2 0 8px,#f4f6f8 8px 16px);
+display:flex;align-items:center;justify-content:center;color:#657084;font-weight:800;text-align:center;padding:16px}
+.demoPass{background:#fff;margin:18px;border-radius:18px;overflow:hidden;border:1px solid #e2e7ee}
+.demoPassHead{background:#17478f;color:#fff;padding:18px}
+.demoPassHead h2{margin:0;font-size:22px}
+.demoPassHead p{margin:4px 0 0;font-size:13px;opacity:.9}
+.demoPassBody{padding:18px}
+.demoGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.demoBox{background:#f6f8fb;border-radius:12px;padding:12px}
+.demoBox b{display:block;font-size:12px;color:#667085;margin-bottom:5px}
+.demoItems{border-top:1px solid #e5e7eb;margin-top:10px;padding-top:10px}
+.demoItem{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:14px}
+.fakeCode{height:110px;margin-top:16px;border-radius:12px;background:#f2f4f7;display:flex;align-items:center;justify-content:center;text-align:center;color:#7b8493;font-weight:800;padding:14px}
+
 </style>
 </head>
 <body>
-<div style="position:fixed;right:8px;top:8px;z-index:9999;background:#111;color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;opacity:.7">Build BARCODE VERIFY v9</div>
+<div style="position:fixed;right:8px;top:8px;z-index:9999;background:#111;color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;opacity:.7">Build VERIFIED CHECKOUT v10</div>
 <div class="app">
 <section id="home" class="screen active">
   <div class="mapWrap">
@@ -357,7 +382,55 @@
   <div class="summaryBottom">
     <div class="summaryBottomIn">
       <div class="summaryTotal"><span>Order Total</span><span id="bottomTotal">$0.00</span></div>
-      <button class="summaryContinue" onclick="alert('Demo order saved for testing.')">Continue</button>
+      <button class="summaryContinue" onclick="goToVerifiedDone()">Continue</button>
+    </div>
+  </div>
+</section>
+
+
+<section id="verifiedDone" class="screen doneScreen">
+  <div class="doneHero">
+    <div class="doneCheck">✓</div>
+    <h1>Thank you for shopping</h1>
+    <p>All items in this demo order were verified.</p>
+  </div>
+  <div class="doneCard">
+    <div class="demoNotice">DEMO ONLY — this does not create a retailer receipt, payment approval, or store exit authorization.</div>
+    <h2>Next step</h2>
+    <p class="muted">Proceed to self-checkout for the normal retailer checkout process.</p>
+    <button class="btn" onclick="startDemoCheckoutWait()">Continue</button>
+  </div>
+</section>
+
+<section id="demoCheckoutWait" class="screen doneScreen">
+  <div class="doneCard" style="margin-top:28px">
+    <div class="demoNotice">DEMO PLACEHOLDER — NOT A SCANNABLE BARCODE</div>
+    <h2>Preparing demo checkout summary…</h2>
+    <p class="muted">This placeholder will display for about 6 seconds.</p>
+    <div class="waitBarcode">NON-SCANNABLE DEMO PLACEHOLDER</div>
+    <div id="demoCountdown" style="text-align:center;font-size:28px;font-weight:900;margin-top:16px">6</div>
+  </div>
+</section>
+
+<section id="demoPass" class="screen doneScreen">
+  <div class="demoPass">
+    <div class="demoPassHead">
+      <h2>DriverScan Demo Checkout Summary</h2>
+      <p>Prototype record only</p>
+    </div>
+    <div class="demoPassBody">
+      <div class="demoNotice">NOT VALID FOR STORE EXIT, PAYMENT, OR PROOF OF PURCHASE.</div>
+      <div class="demoGrid">
+        <div class="demoBox"><b>TIME</b><span id="demoPassTime">—</span></div>
+        <div class="demoBox"><b>STORE</b><span id="demoPassStore">Selected nearby store</span></div>
+        <div class="demoBox" style="grid-column:1/-1"><b>DROP-OFF</b><span id="demoPassDropoff">Demo destination — no real address generated</span></div>
+      </div>
+      <div class="demoItems">
+        <b>ITEMS</b>
+        <div id="demoPassItems"></div>
+      </div>
+      <div class="fakeCode">DEMO CODE AREA<br>NON-SCANNABLE</div>
+      <button class="btn" onclick="show('home')">Return Home</button>
     </div>
   </div>
 </section>
@@ -844,6 +917,62 @@ function closeItemScanner(hide=true){
 function closeVerifySuccess(){
   document.getElementById('verifySuccess').classList.remove('open');
   verifyItemId=null;
+}
+
+
+function allDemoItemsVerified(){
+  const ids=Object.keys(demoOrder).filter(id=>demoOrder[id]>0);
+  return ids.length>0 && ids.every(id=>!demoOut[id]);
+}
+
+function goToVerifiedDone(){
+  if(!allDemoItemsVerified()){
+    alert('Finish verifying the demo order first.');
+    return;
+  }
+  show('verifiedDone');
+}
+
+function startDemoCheckoutWait(){
+  show('demoCheckoutWait');
+  let left=6;
+  const el=document.getElementById('demoCountdown');
+  if(el) el.textContent=left;
+  const timer=setInterval(()=>{
+    left-=1;
+    if(el) el.textContent=Math.max(left,0);
+    if(left<=0){
+      clearInterval(timer);
+      buildDemoPass();
+      show('demoPass');
+    }
+  },1000);
+}
+
+function buildDemoPass(){
+  const t=document.getElementById('demoPassTime');
+  if(t) t.textContent=new Date().toLocaleString();
+
+  const store=document.getElementById('demoPassStore');
+  try{
+    if(storeResults && storeResults.length){
+      store.textContent=storeResults[0].name || 'Selected nearby store';
+    }else{
+      store.textContent='Selected nearby store';
+    }
+  }catch(e){
+    store.textContent='Selected nearby store';
+  }
+
+  const itemsBox=document.getElementById('demoPassItems');
+  if(itemsBox){
+    const ids=Object.keys(demoOrder).filter(id=>demoOrder[id]>0);
+    itemsBox.innerHTML=ids.map(id=>{
+      const item=itemById(id);
+      const q=demoOrder[id]||0;
+      return `<div class="demoItem"><span>${escapeHtml(item?item.name:id)} × ${q}</span><strong>${item?money(item.price*q):''}</strong></div>`;
+    }).join('');
+  }
 }
 
 function renderOrderSummary(){
