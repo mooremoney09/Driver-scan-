@@ -140,6 +140,33 @@
 .verifyDoneBtn{border:0;border-radius:999px;background:#fff;color:#15803d;padding:14px 24px;font-size:18px;font-weight:900}
 .verifyWrong{background:#fee2e2!important;color:#b42318!important}
 
+/* Clear item scanner */
+.verifyOverlay{position:fixed;inset:0;background:#fff;z-index:9000;display:none;padding:0;overflow:auto}
+.verifyOverlay.open{display:block}
+.verifyCard{width:100%;max-width:520px;min-height:100vh;margin:auto;background:#fff;border-radius:0;overflow:hidden;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+.verifyHead{height:68px;padding:12px 18px;background:#176ff2;color:#fff;display:grid;grid-template-columns:54px 1fr 54px;align-items:center}
+.verifyHead b{text-align:center;font-size:20px}.verifyHead button{justify-self:start}.verifyHelp{justify-self:end;font-size:15px;font-weight:700}
+.verifyBody{padding:0}
+.verifyCamera{position:relative;background:#101820;min-height:54vh;overflow:hidden}
+.verifyVideo{width:100%;height:54vh;object-fit:cover;background:#111;border-radius:0;display:block}
+.verifyFrame{position:absolute;inset:7% 7%;border:3px solid rgba(255,255,255,.96);border-radius:20px;pointer-events:none}
+.verifyFrame:before,.verifyFrame:after{content:"";position:absolute;width:30px;height:30px;border-color:#fff}
+.verifyFrame:before{left:14px;top:14px;border-left:5px solid;border-top:5px solid;border-radius:8px 0 0 0}
+.verifyFrame:after{right:14px;bottom:14px;border-right:5px solid;border-bottom:5px solid;border-radius:0 0 8px 0}
+.verifyHint{position:absolute;left:12%;right:12%;bottom:10%;color:#fff;text-align:center;font-size:16px;text-shadow:0 1px 5px #000}
+.verifyToast{position:absolute;z-index:3;left:20%;right:20%;top:24%;background:#19a83f;color:#fff;border-radius:18px;padding:17px 10px;text-align:center;opacity:0;transform:translateY(-8px);transition:.25s;pointer-events:none}
+.verifyToast.show{opacity:1;transform:none}.verifyToast strong{display:block;font-size:21px}.verifyToast span{display:block;font-size:16px;margin-top:4px}
+.verifyInfo{padding:18px 22px 0;text-align:right;font-size:14px;color:#445063}
+.verifyItemCard{margin:18px 20px 0;padding:17px;background:#fff;border:1px solid #e5e9ef;border-radius:14px;box-shadow:0 3px 12px rgba(0,0,0,.08);display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
+.verifyItemLabel{grid-column:1/-1;color:#667085;font-size:14px}.verifyItemName{font-weight:850;font-size:17px;line-height:1.25}.verifyItemStatus{color:#16a34a;font-weight:800;white-space:nowrap}
+.verifyMsg{margin:14px 20px 0;padding:10px 12px;border-radius:10px;background:#f3f6fa;color:#334155;font-size:13px;font-weight:700}
+.verifyRetry{margin:10px 20px 0;width:calc(100% - 40px)}
+.deliverySliderWrap{position:relative;margin:24px 20px 0;height:62px;border-radius:999px;background:#17469d;color:#fff;overflow:hidden}
+.deliverySliderLabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:850;pointer-events:none}
+.deliverySlider{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:.001;cursor:pointer;z-index:2}
+.deliveryKnob{position:absolute;left:4px;top:4px;width:54px;height:54px;border-radius:50%;background:#3578f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;transition:left .08s;pointer-events:none;z-index:1}
+.deliverySliderWrap.disabled{opacity:.45}.deliverySliderWrap.disabled .deliverySlider{pointer-events:none}
+
 
 /* Verified checkout demo flow v10 */
 .doneScreen{background:#f7f9fc;min-height:100vh;padding-bottom:110px}
@@ -583,7 +610,7 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
   </div>
 </section>
 
-<section id="trips" class="screen"><div class="pageHead"><h1>Trips</h1></div><div class="page"><div class="card"><b>Active Order</b><p class="muted">Demo Market • 3 items</p><button class="btn" onclick="show('scan')">Scan Items</button></div></div></section>
+<section id="trips" class="screen"><div class="pageHead"><h1>Trips</h1></div><div class="page"><div class="card"><b>Active Order</b><p class="muted">Demo Market • 3 items</p><button class="btn" onclick="openFirstOrderScanner()">Scan Items</button></div></div></section>
 <section id="earnings" class="screen"><div class="pageHead"><h1>Earnings</h1></div><div class="page"><div class="card"><b>Today</b><h2>$0.00</h2></div></div></section>
 <section id="notifications" class="screen"><div class="pageHead"><h1>Notifications</h1></div><div class="page"><div class="card">No new notifications.</div></div></section>
 <section id="more" class="screen"><div class="pageHead"><h1>More</h1></div><div class="page"><div class="card"><b>DriverScan</b><p class="muted">Nearby-store finder + barcode scanner</p></div></div></section>
@@ -865,26 +892,31 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
 <div id="verifyOverlay" class="verifyOverlay">
   <div class="verifyCard">
     <div class="verifyHead">
-      <b>Scan Item Barcode</b>
-      <button onclick="closeItemScanner()" style="border:0;background:none;color:#fff;font-size:26px">×</button>
+      <button onclick="closeItemScanner()" style="border:0;background:none;color:#fff;font-size:34px">×</button>
+      <b>Scan and Load</b>
+      <span class="verifyHelp">Help</span>
     </div>
     <div class="verifyBody">
-      <div id="verifyItemName" style="font-weight:900;font-size:17px;margin-bottom:10px"></div>
-      <video id="verifyVideo" class="verifyVideo" playsinline muted></video>
+      <div class="verifyCamera">
+        <video id="verifyVideo" class="verifyVideo" playsinline muted></video>
+        <div class="verifyFrame"></div>
+        <div id="verifyToast" class="verifyToast"><strong>✓ Correct barcode</strong><span>Item verified</span></div>
+        <div class="verifyHint">Center the barcode inside the box</div>
+      </div>
+      <div class="verifyInfo">Scan instructions&nbsp; ⓘ</div>
+      <div class="verifyItemCard">
+        <div class="verifyItemLabel">Order item</div>
+        <div id="verifyItemName" class="verifyItemName"></div>
+        <div id="verifyItemStatus" class="verifyItemStatus">Waiting</div>
+      </div>
       <div id="verifyMsg" class="verifyMsg">Starting camera…</div>
-      <button class="btn" onclick="startItemScanner()">Start Scanner</button>
-      <button class="btn" style="background:#667085" onclick="skipDemoBarcode()">Skip Scan (Demo)</button>
-      <button class="btn" style="background:#29445f" onclick="closeItemScanner()">Cancel</button>
+      <button class="btn verifyRetry" onclick="startItemScanner()">Restart Scanner</button>
+      <div id="deliverySliderWrap" class="deliverySliderWrap disabled">
+        <div class="deliverySliderLabel">START DELIVERY</div>
+        <div id="deliveryKnob" class="deliveryKnob">»</div>
+        <input id="deliverySlider" class="deliverySlider" type="range" min="0" max="100" value="0" aria-label="Slide to start delivery">
+      </div>
     </div>
-  </div>
-</div>
-
-<div id="verifySuccess" class="verifySuccess">
-  <div class="verifySuccessInner">
-    <div class="verifyCheck">✓</div>
-    <h1>You have the correct item</h1>
-    <p>Thank you for shopping</p>
-    <button class="verifyDoneBtn" onclick="closeVerifySuccess()">Done</button>
   </div>
 </div>
 
@@ -1126,7 +1158,12 @@ function acceptDemoOffer(i){
   localStorage.setItem('demoAcceptedStore', JSON.stringify(s||{}));
   show('trips');
   const trip=document.querySelector('#trips .card');
-  if(trip && s) trip.innerHTML='<div style="font-size:12px;font-weight:900;color:#17478f">ACTIVE ORDER</div><h2>'+escapeHtml(s.name)+'</h2><p class="muted">'+s.distance.toFixed(1)+' mi away • Shopping order</p><button class="btn" onclick="show(\'scan\')">Scan Items</button>';
+  if(trip && s) trip.innerHTML='<div style="font-size:12px;font-weight:900;color:#17478f">ACTIVE ORDER</div><h2>'+escapeHtml(s.name)+'</h2><p class="muted">'+s.distance.toFixed(1)+' mi away • Shopping order</p><button class="btn" onclick="openFirstOrderScanner()">Scan Items</button>';
+}
+
+function openFirstOrderScanner(){
+  const id=Object.keys(demoOrder).find(key=>demoOrder[key]>0) || DEMO_INVENTORY[0]?.id;
+  if(id)openItemScanner(id);
 }
 
 function show(id){
@@ -1261,6 +1298,12 @@ function openItemScanner(id){
   const item=itemById(id);
   if(!item) return;
   document.getElementById('verifyItemName').textContent=item.name;
+  document.getElementById('verifyItemStatus').textContent='Waiting';
+  document.getElementById('verifyToast').classList.remove('show');
+  const slider=document.getElementById('deliverySlider');
+  slider.value=0;
+  document.getElementById('deliveryKnob').style.left='4px';
+  document.getElementById('deliverySliderWrap').classList.add('disabled');
   const msg=document.getElementById('verifyMsg');
   msg.classList.remove('verifyWrong');
   msg.textContent='Ready to scan the barcode for this item.';
@@ -1289,15 +1332,7 @@ async function startItemScanner(){
         verifyReader=null;
 
         if(expected && scanned===expected){
-          closeItemScanner(false);
-          {
-          const success=document.getElementById('verifySuccess');
-          const h=success.querySelector('h1');
-          const p=success.querySelector('p');
-          if(h) h.textContent='You have the correct item';
-          if(p) p.textContent='Thank you for shopping';
-          success.classList.add('open');
-        }
+          markScannerSuccess();
         }else{
           msg.classList.add('verifyWrong');
           msg.textContent='Wrong item. Scanned barcode: '+scanned;
@@ -1311,22 +1346,11 @@ async function startItemScanner(){
   }
 }
 
-
-function skipDemoBarcode(){
-  if(verifyReader){
-    try{verifyReader.reset()}catch(e){}
-    verifyReader=null;
-  }
-  const o=document.getElementById('verifyOverlay');
-  if(o) o.classList.remove('open');
-  const success=document.getElementById('verifySuccess');
-  if(success){
-    const h=success.querySelector('h1');
-    const p=success.querySelector('p');
-    if(h) h.textContent='Scan skipped — demo mode';
-    if(p) p.textContent='No barcode match was verified.';
-    success.classList.add('open');
-  }
+function markScannerSuccess(){
+  document.getElementById('verifyToast').classList.add('show');
+  document.getElementById('verifyItemStatus').textContent='Scanned 1/1';
+  document.getElementById('verifyMsg').textContent='Correct barcode. Slide to start delivery.';
+  document.getElementById('deliverySliderWrap').classList.remove('disabled');
 }
 
 function closeItemScanner(hide=true){
@@ -1343,10 +1367,24 @@ function closeItemScanner(hide=true){
   }
 }
 
-function closeVerifySuccess(){
-  document.getElementById('verifySuccess').classList.remove('open');
-  verifyItemId=null;
-}
+const deliverySlider=document.getElementById('deliverySlider');
+deliverySlider.addEventListener('input',()=>{
+  const value=Number(deliverySlider.value);
+  const wrap=document.getElementById('deliverySliderWrap');
+  const knob=document.getElementById('deliveryKnob');
+  const travel=Math.max(0,wrap.clientWidth-62);
+  knob.style.left=(4+travel*value/100)+'px';
+});
+deliverySlider.addEventListener('change',()=>{
+  if(Number(deliverySlider.value)>=92){
+    closeItemScanner();
+    verifyItemId=null;
+    show('trips');
+  }else{
+    deliverySlider.value=0;
+    document.getElementById('deliveryKnob').style.left='4px';
+  }
+});
 
 
 
