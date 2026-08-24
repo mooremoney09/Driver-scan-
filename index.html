@@ -459,6 +459,20 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
 .readOnlyTotal{display:flex;justify-content:space-between;gap:12px;border-top:2px solid #dfe5ed;padding-top:16px;margin-top:8px;font-size:21px;font-weight:900}
 .readOnlyContinue{display:block;width:100%;margin-top:18px;border:0;border-radius:999px;padding:17px 14px;background:#194f9d;color:#fff;font-size:18px;font-weight:900;letter-spacing:.15px;box-shadow:0 3px 10px rgba(25,79,157,.22);touch-action:manipulation}
 .readOnlyContinue:active{transform:scale(.99);background:#123f82}
+body.deliveryLocked .nav{display:none}
+body.deliveryLocked .app{padding-bottom:0}
+.startDeliveryBtn{display:block;width:100%;margin-top:18px;border:0;border-radius:999px;padding:18px;background:#194f9d;color:#fff;font-size:19px;font-weight:900;letter-spacing:.5px;touch-action:manipulation}
+.startDeliveryBtn:active{transform:scale(.99);background:#123f82}
+.deliveryTrip{background:#f3f4f6;min-height:100vh;padding-bottom:110px}
+.deliveryTripHead{background:#244a91;color:#fff;padding:20px 18px;text-align:center;font-size:20px;font-weight:900;position:sticky;top:0;z-index:50}
+.deliveryTimeline{position:relative;padding:18px 18px 124px 64px}.deliveryTimeline:before{content:"";position:absolute;left:39px;top:42px;bottom:145px;border-left:2px dashed #c6ccd5}
+.deliveryStepDot{position:absolute;left:24px;width:32px;height:32px;border-radius:50%;background:#244a91;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;z-index:2}
+.deliveryCard{background:#fff;border-radius:16px;padding:17px;margin-bottom:16px;box-shadow:0 2px 9px rgba(0,0,0,.06)}.deliveryCard h2{margin:4px 0 5px;font-size:20px}.deliveryTime{color:#244a91;font-weight:900}.deliveryAddress{color:#697386;line-height:1.35}
+.deliveryRouteArt{height:150px;border-radius:16px;background:#e6edf8;display:flex;align-items:center;justify-content:center;gap:38px;font-size:58px;margin-bottom:16px}
+.deliveryCustomer{display:flex;align-items:center;gap:11px;margin:10px 0}.deliveryAvatar{width:44px;height:44px;border-radius:50%;background:#ffd43b;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px}
+.navigateBtn{display:block;width:100%;border:0;border-radius:999px;padding:16px;background:#244a91;color:#fff;font-size:18px;font-weight:900;margin-top:14px}
+.completeDeliveryBtn{position:fixed;z-index:80;left:18px;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));max-width:484px;margin:auto;border:0;border-radius:999px;padding:18px;background:#28c7bd;color:#fff;font-size:18px;font-weight:900;letter-spacing:1px}
+.loadingNotes{position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:9800;display:none;align-items:flex-end;justify-content:center}.loadingNotes.open{display:flex}.loadingSheet{width:100%;max-width:520px;background:#fff;border-radius:26px 26px 0 0;padding:24px 22px calc(24px + env(safe-area-inset-bottom));text-align:center}.loadingSheet h2{text-align:left;margin:0 0 18px;color:#163f82}.loadingArt{height:190px;border-radius:18px;background:#e9f1fd;display:flex;align-items:center;justify-content:center;font-size:92px}.loadingSheet p{font-size:17px;line-height:1.45;color:#525d6b}.gotItBtn{width:100%;border:0;border-radius:12px;padding:17px;background:#244a91;color:#fff;font-size:18px;font-weight:900;letter-spacing:1px}
 
 </style>
 </head>
@@ -844,10 +858,40 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
         <div id="p16Items"></div>
       </div>
 
-      <button class="btn" onclick="openReadOnlyOrderSummary()">View Order Summary</button>
+      <button id="startDeliveryBtn" class="startDeliveryBtn" type="button" onclick="startDeliveryTrip()">START DELIVERY</button>
     </div>
   </div>
 </section>
+
+<section id="deliveryTrip" class="screen deliveryTrip">
+  <div class="deliveryTripHead">Trip In Progress</div>
+  <div class="deliveryTimeline">
+    <div class="deliveryStepDot" style="top:26px">✓</div>
+    <div class="deliveryCard">
+      <div id="deliveryPickupTime" class="deliveryTime">Shopping complete</div>
+      <h2 id="deliveryStoreName">Selected Store</h2>
+      <div id="deliveryStoreAddress" class="deliveryAddress">Nearby store location</div>
+    </div>
+    <div class="deliveryRouteArt" aria-hidden="true"><span>🚙</span><span>🏠</span></div>
+    <div class="deliveryStepDot" style="top:278px">2</div>
+    <div class="deliveryCard">
+      <div class="deliveryTime">Next stop • Drop-off</div>
+      <div class="deliveryCustomer"><div class="deliveryAvatar">D</div><h2 id="deliveryCustomerName">Delivery Customer</h2></div>
+      <div id="deliveryDropoffAddress" class="deliveryAddress">Nearby delivery destination</div>
+      <button id="navigateDeliveryBtn" class="navigateBtn" type="button" onclick="navigateDelivery()">➤ Navigate</button>
+    </div>
+  </div>
+  <button id="completeDeliveryBtn" class="completeDeliveryBtn" type="button" onclick="completeDeliveryOrder()">COMPLETE ORDER</button>
+</section>
+
+<div id="loadingNotes" class="loadingNotes" role="dialog" aria-modal="true" aria-labelledby="loadingNotesTitle">
+  <div class="loadingSheet">
+    <h2 id="loadingNotesTitle">ⓘ Loading notes</h2>
+    <div class="loadingArt" aria-hidden="true">🚙 📦</div>
+    <p>Keep the order secure and separate from other items in your vehicle for a quick, easy drop-off.</p>
+    <button id="loadingGotItBtn" class="gotItBtn" type="button" onclick="closeLoadingNotes()">GOT IT</button>
+  </div>
+</div>
 
 <section id="readOnlyOrderSummary" class="screen readOnlySummary">
   <div class="readOnlyHead">
@@ -1199,9 +1243,43 @@ function show(id){
   if(id!=='scan')stopScanner(false);
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  document.body.classList.toggle('deliveryLocked',id==='prototypePass16'||id==='deliveryTrip');
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   window.scrollTo(0,0);
   if(id==='home')setTimeout(()=>map&&map.invalidateSize(),100);
+}
+
+let deliveryDestination=null;
+function startDeliveryTrip(){
+  let store={};
+  try{store=JSON.parse(localStorage.getItem('demoAcceptedStore')||'{}')||{}}catch(e){}
+  const baseLat=Number(store.lat??userPos?.lat??fallback[0]);
+  const baseLon=Number(store.lon??userPos?.lon??fallback[1]);
+  deliveryDestination={lat:baseLat,lon:baseLon};
+  document.getElementById('deliveryStoreName').textContent=store.name||'Selected Nearby Store';
+  document.getElementById('deliveryStoreAddress').textContent=store.address||'Current shopping location';
+  document.getElementById('deliveryPickupTime').textContent=new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+' • Shopping complete';
+  document.getElementById('deliveryDropoffAddress').textContent=store.address||'Selected nearby destination';
+  show('deliveryTrip');
+  document.getElementById('loadingNotes').classList.add('open');
+}
+
+function closeLoadingNotes(){
+  document.getElementById('loadingNotes').classList.remove('open');
+}
+
+function navigateDelivery(){
+  if(!deliveryDestination)return;
+  const target=deliveryDestination.lat.toFixed(6)+','+deliveryDestination.lon.toFixed(6);
+  window.open('https://maps.apple.com/?daddr='+encodeURIComponent(target)+'&dirflg=d','_blank');
+}
+
+function completeDeliveryOrder(){
+  closeLoadingNotes();
+  deliveryDestination=null;
+  try{localStorage.removeItem('demoAcceptedStore')}catch(e){}
+  alert('Order complete.');
+  show('home');
 }
 async function startScanner(){
   try{
