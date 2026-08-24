@@ -448,6 +448,17 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
 }
 .pass16Foot{border:1px solid #dce9fb}
 .pass16Items{margin-top:18px}
+.readOnlySummary{background:#f5f7fa;min-height:100vh;padding-bottom:110px}
+.readOnlyHead{background:#0b2d5b;color:#fff;padding:20px 18px;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;position:sticky;top:0;z-index:50}
+.readOnlyHead h1{margin:0;text-align:center;font-size:21px}.readOnlyBack{border:0;background:none;color:#fff;font-size:32px;line-height:1}
+.readOnlyMeta{background:#fff;padding:18px;border-bottom:1px solid #e2e7ee}.readOnlyMeta strong{display:block;font-size:27px}.readOnlyMeta span{color:#667085;font-size:15px}
+.readOnlyList{background:#fff;margin:16px;border:2px solid #0b2d5b;border-radius:20px;padding:18px 16px}
+.readOnlyItem{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid #e7ebf0;pointer-events:none;user-select:none}
+.readOnlyItem:last-child{border-bottom:0}.readOnlyItem img{width:72px;height:72px;object-fit:contain;border-radius:8px;background:#fff}.readOnlyBlank{width:72px;height:72px;border-radius:8px;background:#f0f2f5}
+.readOnlyName{font-size:17px;line-height:1.3}.readOnlyQty{color:#667085;font-size:14px;margin-top:4px}.readOnlyPrice{font-size:18px;font-weight:900;white-space:nowrap}
+.readOnlyTotal{display:flex;justify-content:space-between;gap:12px;border-top:2px solid #dfe5ed;padding-top:16px;margin-top:8px;font-size:21px;font-weight:900}
+.readOnlyContinue{display:block;width:100%;margin-top:18px;border:0;border-radius:999px;padding:17px 14px;background:#194f9d;color:#fff;font-size:18px;font-weight:900;letter-spacing:.15px;box-shadow:0 3px 10px rgba(25,79,157,.22);touch-action:manipulation}
+.readOnlyContinue:active{transform:scale(.99);background:#123f82}
 
 </style>
 </head>
@@ -833,8 +844,25 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
         <div id="p16Items"></div>
       </div>
 
-      <button class="btn" onclick="renderOrderSummary();show('orderSummary')">View Order Summary</button>
+      <button class="btn" onclick="openReadOnlyOrderSummary()">View Order Summary</button>
     </div>
+  </div>
+</section>
+
+<section id="readOnlyOrderSummary" class="screen readOnlySummary">
+  <div class="readOnlyHead">
+    <button class="readOnlyBack" type="button" onclick="show('prototypePass16')" aria-label="Back">‹</button>
+    <h1>Order Summary</h1>
+    <span></span>
+  </div>
+  <div class="readOnlyMeta">
+    <strong id="readOnlyCount">0 Items</strong>
+    <span id="readOnlyEst">Estimated total: $0.00</span>
+  </div>
+  <div class="readOnlyList">
+    <div id="readOnlyItems"></div>
+    <div class="readOnlyTotal"><span>Order Total</span><span id="readOnlyTotal">$0.00</span></div>
+    <button id="readOnlyContinue" class="readOnlyContinue" type="button" onclick="continueFromReadOnlySummary()">CONTINUE TO REVIEW &amp; PAY</button>
   </div>
 </section>
 
@@ -1523,6 +1551,32 @@ function buildDemoPass(){
     const verifiedEl=document.getElementById('demoPassVerified');
     if(verifiedEl) verifiedEl.textContent=passQty+' verified';
   }
+}
+
+function openReadOnlyOrderSummary(){
+  const ids=Object.keys(demoOrder).filter(id=>demoOrder[id]>0 && !demoOut[id]);
+  let total=0,qty=0;
+  const box=document.getElementById('readOnlyItems');
+  if(!box)return;
+  box.innerHTML=ids.map(id=>{
+    const item=itemById(id),q=demoOrder[id]||0;
+    if(!item)return '';
+    qty+=q;total+=item.price*q;
+    const pic=item.img?`<img src="${item.img}" alt="">`:'<div class="readOnlyBlank"></div>';
+    return `<div class="readOnlyItem" aria-disabled="true">
+      ${pic}
+      <div><div class="readOnlyName">${escapeHtml(item.name)}</div><div class="readOnlyQty">Qty: ${q}</div></div>
+      <div class="readOnlyPrice">${money(item.price*q)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('readOnlyCount').textContent=qty+' '+(qty===1?'Item':'Items');
+  document.getElementById('readOnlyEst').textContent='Estimated total: '+money(total);
+  document.getElementById('readOnlyTotal').textContent=money(total);
+  show('readOnlyOrderSummary');
+}
+
+function continueFromReadOnlySummary(){
+  show('prototypePass16');
 }
 
 function renderOrderSummary(){
