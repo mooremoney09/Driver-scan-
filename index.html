@@ -130,7 +130,7 @@
 </style>
 </head>
 <body>
-<div style="position:fixed;right:8px;top:8px;z-index:9999;background:#111;color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;opacity:.7">Build BARCODE VERIFY v8</div>
+<div style="position:fixed;right:8px;top:8px;z-index:9999;background:#111;color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;opacity:.7">Build BARCODE VERIFY v9</div>
 <div class="app">
 <section id="home" class="screen active">
   <div class="mapWrap">
@@ -401,6 +401,7 @@
       <video id="verifyVideo" class="verifyVideo" playsinline muted></video>
       <div id="verifyMsg" class="verifyMsg">Starting camera…</div>
       <button class="btn" onclick="startItemScanner()">Start Scanner</button>
+      <button class="btn" style="background:#667085" onclick="skipDemoBarcode()">Skip Scan (Demo)</button>
       <button class="btn" style="background:#29445f" onclick="closeItemScanner()">Cancel</button>
     </div>
   </div>
@@ -787,7 +788,14 @@ async function startItemScanner(){
 
         if(expected && scanned===expected){
           closeItemScanner(false);
-          document.getElementById('verifySuccess').classList.add('open');
+          {
+          const success=document.getElementById('verifySuccess');
+          const h=success.querySelector('h1');
+          const p=success.querySelector('p');
+          if(h) h.textContent='You have the correct item';
+          if(p) p.textContent='Thank you for shopping';
+          success.classList.add('open');
+        }
         }else{
           msg.classList.add('verifyWrong');
           msg.textContent='Wrong item. Scanned barcode: '+scanned;
@@ -798,6 +806,24 @@ async function startItemScanner(){
   }catch(e){
     msg.classList.add('verifyWrong');
     msg.textContent='Scanner error: '+e.message;
+  }
+}
+
+
+function skipDemoBarcode(){
+  if(verifyReader){
+    try{verifyReader.reset()}catch(e){}
+    verifyReader=null;
+  }
+  const o=document.getElementById('verifyOverlay');
+  if(o) o.classList.remove('open');
+  const success=document.getElementById('verifySuccess');
+  if(success){
+    const h=success.querySelector('h1');
+    const p=success.querySelector('p');
+    if(h) h.textContent='Scan skipped — demo mode';
+    if(p) p.textContent='No barcode match was verified.';
+    success.classList.add('open');
   }
 }
 
