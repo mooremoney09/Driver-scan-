@@ -332,6 +332,35 @@ html,body{
   font-size:26px;
 }
 
+
+/* Prototype verification pass v16 */
+.pass16{background:#f6f9fd;min-height:100vh;padding:14px 14px 120px}
+.pass16Card{background:#fff;border-radius:18px;overflow:hidden;border:1px solid #dce5ef;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.pass16Head{background:#0f55c5;color:#fff;padding:18px}
+.pass16Head h1{font-size:22px;margin:0}.pass16Head p{margin:4px 0 0;font-size:12px;opacity:.9}
+.pass16Body{padding:18px}
+.pass16Proto{font-size:11px;color:#7a8492;text-align:center;font-weight:800;margin-bottom:12px}
+.pass16Top{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-bottom:1px dashed #d8dee8;padding-bottom:14px}
+.pass16Box b{display:block;font-size:11px;color:#667085;margin-bottom:4px}
+.pass16Box strong{font-size:17px}
+.pass16Store{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px 0;border-bottom:1px dashed #d8dee8}
+.pass16Total{background:#eef5ff;border-radius:12px;padding:10px 14px;text-align:center}
+.pass16Total b{display:block;font-size:11px;color:#667085}.pass16Total strong{font-size:26px;color:#0f55c5}
+.pass16Stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 0;border-bottom:1px dashed #d8dee8}
+.pass16Stat{text-align:center}.pass16Stat b{display:block;font-size:10px;color:#667085}.pass16Stat strong{display:block;font-size:14px;color:#0f55c5;margin-top:3px}
+.pass16CodeTitle{text-align:center;color:#0f55c5;font-weight:900;font-size:13px;margin:16px 0 8px}
+.pass16Bars{height:76px;border-radius:8px;background:repeating-linear-gradient(90deg,#111 0 4px,#fff 4px 7px,#111 7px 10px,#fff 10px 15px);opacity:.18}
+.pass16QR{width:190px;height:190px;margin:14px auto;border-radius:14px;background:
+linear-gradient(90deg,#111 12px,transparent 12px) 0 0/32px 32px,
+linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
+#fff;border:14px solid #111;opacity:.14;position:relative}
+.pass16QR:after{content:"NON-SCANNABLE";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#667085;background:rgba(255,255,255,.8)}
+.pass16Items{margin-top:14px;border-top:1px solid #e7ebf0;padding-top:12px}
+.pass16Item{display:grid;grid-template-columns:44px 1fr auto;gap:9px;align-items:center;padding:7px 0}
+.pass16Item img{width:44px;height:44px;object-fit:contain;border-radius:7px}
+.pass16Foot{background:#eef5ff;border-radius:12px;padding:12px;margin-top:14px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.pass16Clock{font-size:24px;font-weight:900;color:#0f55c5}
+
 </style>
 </head>
 <body>
@@ -570,7 +599,7 @@ html,body{
 
 
 <section id="reviewPay" class="screen reviewPay">
-<div style="display:none">Build PASS VISUAL v15</div>
+<div style="display:none">Build PROTOTYPE PASS v16</div>
   <div class="rpTop">
     <div class="rpTitleRow">
       <button class="rpBack" onclick="show('orderSummary')">‹</button>
@@ -652,6 +681,65 @@ html,body{
     <p class="muted">This placeholder will display for about 6 seconds.</p>
     <div class="waitBarcode">NON-SCANNABLE DEMO PLACEHOLDER</div>
     <div id="demoCountdown" style="text-align:center;font-size:28px;font-weight:900;margin-top:16px">6</div>
+  </div>
+</section>
+
+
+<section id="prototypePass16" class="screen pass16">
+  <div class="pass16Card">
+    <div class="pass16Head">
+      <h1>DriverScan Order Verification</h1>
+      <p>Prototype summary</p>
+    </div>
+    <div class="pass16Body">
+      <div class="pass16Proto">Prototype — not retailer-issued</div>
+
+      <div class="pass16Top">
+        <div class="pass16Box">
+          <b>ORDER #</b>
+          <strong id="p16Order">SDR-0524237</strong>
+        </div>
+        <div class="pass16Box">
+          <b>DATE & TIME</b>
+          <strong id="p16Date">May 23, 2025 • 10:48 AM</strong>
+        </div>
+      </div>
+
+      <div class="pass16Store">
+        <div>
+          <div class="pass16Box"><b>STORE</b><strong id="p16Store">Walmart Supercenter</strong></div>
+          <div id="p16Address" style="color:#667085;margin-top:4px">12345 Michigan Ave<br>Detroit, MI 48201</div>
+        </div>
+        <div class="pass16Total"><b>ORDER TOTAL</b><strong id="p16Total">$74.32</strong></div>
+      </div>
+
+      <div class="pass16Stats">
+        <div class="pass16Stat"><b>ITEMS VERIFIED</b><strong id="p16Verified">12 of 12</strong><span>All items scanned</span></div>
+        <div class="pass16Stat"><b>PAYMENT</b><strong>Prototype complete</strong><span>DriverScan Card •••• 4242</span></div>
+        <div class="pass16Stat"><b>STATUS</b><strong>Verification complete</strong><span>Prototype only</span></div>
+      </div>
+
+      <div class="pass16CodeTitle">← PROTOTYPE CODE AREA →</div>
+      <div class="pass16Bars"></div>
+      <div class="pass16QR"></div>
+
+      <div style="text-align:center;font-size:12px;color:#667085">
+        Prototype record for this order and driver only.<br>
+        Do not use as proof of payment or store authorization.
+      </div>
+
+      <div class="pass16Foot">
+        <div><b>This prototype summary expires in 30 minutes.</b><br><span style="color:#667085;font-size:12px">Thank you for delivering great service!</span></div>
+        <div id="p16Countdown" class="pass16Clock">30:00</div>
+      </div>
+
+      <div class="pass16Items">
+        <b>ITEMS</b>
+        <div id="p16Items"></div>
+      </div>
+
+      <button class="btn" onclick="renderOrderSummary();show('orderSummary')">View Order Summary</button>
+    </div>
   </div>
 </section>
 
@@ -1229,10 +1317,42 @@ function startDemoCheckoutWait(){
     if(el) el.textContent=Math.max(left,0);
     if(left<=0){
       clearInterval(timer);
-      buildDemoPass();
-      show('demoPass');
+      openPrototypePass16();
     }
   },1000);
+}
+
+
+let p16Timer=null;
+function openPrototypePass16(){
+  const ids=Object.keys(demoOrder).filter(id=>demoOrder[id]>0);
+  let total=0,qty=0;
+  const box=document.getElementById('p16Items');
+  if(box){
+    box.innerHTML=ids.map(id=>{
+      const item=itemById(id); const q=demoOrder[id]||0;
+      if(!item) return '';
+      total+=item.price*q; qty+=q;
+      const pic=item.img?`<img src="${item.img}" alt="">`:`<div style="width:44px;height:44px;background:#eef1f4;border-radius:7px"></div>`;
+      return `<div class="pass16Item">${pic}<div>${escapeHtml(item.name)}<br><span style="font-size:12px;color:#667085">Qty: ${q}</span></div><strong>${money(item.price*q)}</strong></div>`;
+    }).join('');
+  }
+  document.getElementById('p16Total').textContent=money(total);
+  document.getElementById('p16Verified').textContent=qty+' of '+qty;
+  document.getElementById('p16Date').textContent=new Date().toLocaleString([], {month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+
+  let left=30*60;
+  clearInterval(p16Timer);
+  const tick=()=>{
+    const m=Math.floor(left/60), sec=left%60;
+    const el=document.getElementById('p16Countdown');
+    if(el) el.textContent=String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+    if(left<=0){clearInterval(p16Timer);return;}
+    left--;
+  };
+  tick();
+  p16Timer=setInterval(tick,1000);
+  show('prototypePass16');
 }
 
 function buildDemoPass(){
