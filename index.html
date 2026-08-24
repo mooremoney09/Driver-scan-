@@ -194,10 +194,39 @@ display:flex;align-items:center;justify-content:center;color:#657084;font-weight
 .demoSecure{margin-top:12px;background:#eef6ff;border-radius:10px;padding:10px;color:#35638d;font-size:12px}
 .rpContinue{width:100%;border:0;border-radius:12px;background:#086bf0;color:white;padding:16px;font-size:17px;font-weight:900;margin-top:14px}
 
+
+/* Review & Pay scroll fix v13 */
+#reviewPay{
+  min-height:100dvh;
+  height:auto;
+  overflow:visible;
+  padding-bottom:calc(150px + env(safe-area-inset-bottom));
+}
+#reviewPay .rpPage{
+  padding-bottom:calc(150px + env(safe-area-inset-bottom));
+}
+#reviewPay .rpTotalCard{
+  margin-bottom:28px;
+}
+#reviewPay .rpContinue{
+  position:relative;
+  z-index:2;
+  min-height:56px;
+  touch-action:manipulation;
+}
+html,body{
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.app{
+  min-height:100dvh;
+  height:auto;
+  overflow:visible;
+}
+
 </style>
 </head>
 <body>
-<div style="position:fixed;right:8px;top:8px;z-index:9999;background:#111;color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;opacity:.7">Build REVIEW PAY v12</div>
 <div class="app">
 <section id="home" class="screen active">
   <div class="mapWrap">
@@ -432,6 +461,7 @@ display:flex;align-items:center;justify-content:center;color:#657084;font-weight
 
 
 <section id="reviewPay" class="screen reviewPay">
+<div style="display:none">Build REVIEW PAY v13</div>
   <div class="rpTop">
     <div class="rpTitleRow">
       <button class="rpBack" onclick="show('orderSummary')">‹</button>
@@ -478,12 +508,9 @@ display:flex;align-items:center;justify-content:center;color:#657084;font-weight
         <div><div class="payName">DriverScan Card</div><div class="paySub">•••• 4242</div></div>
         <div id="rpPayAmount" class="payAmount">$0.00</div>
       </div>
-      </div>
-        <div>›</div>
-      </div>
     </div>
 
-    <div class="rpCard">
+    <div class="rpCard rpTotalCard">
       <div class="rpTotal"><span>ORDER TOTAL <small style="font-weight:500;color:#7a8492">(Estimated)</small></span><strong id="rpTotal">$0.00</strong></div>
       <div class="demoSecure">Prototype — no real payment is processed.</div>
       <button class="rpContinue" onclick="goToVerifiedDone()">CONTINUE ›</button>
