@@ -28,8 +28,15 @@
 .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.distance{color:#1677f2;font-weight:800;white-space:nowrap}.address{color:#717b89;margin-top:5px;font-size:14px}.small{font-size:12px;color:#8a93a0}
 .section{padding:18px 0 0}.sectionHead{display:flex;justify-content:space-between;align-items:center}.sectionHead h2{font-size:20px;margin:0}.section p{color:#6f7783;margin:6px 0 20px}
 .chart{height:130px;display:flex;align-items:flex-end;justify-content:space-between;border-bottom:1px solid #e7e9ed;padding:0 10px 12px}.barGroup{width:14%;text-align:center;color:#6c7480;font-size:13px}.bar{width:100%;max-width:46px;margin:auto;background:#e8edf4;border-radius:3px 3px 0 0}.bar.active{background:var(--blue)}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e3e7ec;padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:999}.navIn{max-width:520px;margin:auto;display:flex;justify-content:space-around}
-.nav button{border:0;background:none;color:#5e6673;font-size:11px;padding:3px 5px}.nav button.active{color:var(--blue);font-weight:700}.nav .ico{font-size:22px;display:block;margin-bottom:2px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#f6fbff;border-top:1px solid #dfe8f0;padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:999}
+.navIn{max-width:520px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr);align-items:end}
+.nav button{position:relative;border:0;background:none;color:#849bad;font-size:11px;line-height:1.15;padding:2px 1px 3px;min-width:0}
+.nav button.active{color:#1f78dd;font-weight:800}
+.nav .ico{height:25px;display:flex;align-items:center;justify-content:center;margin-bottom:4px}
+.nav .ico svg{width:25px;height:25px;display:block;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav .earnIcon{font-size:29px;font-weight:400;line-height:25px}
+.nav .moreIcon{font-size:25px;font-weight:800;letter-spacing:2px;line-height:18px}
+.navBadge{position:absolute;top:-2px;left:calc(50% + 7px);width:10px;height:10px;border-radius:50%;background:#f04b45;box-shadow:0 0 0 2px #f6fbff}
 .pageHead{background:#0a1e35;color:white;padding:24px 18px}.page{padding:18px}.card{background:#fff;border-radius:16px;border:1px solid #e5e9ef;padding:16px;margin-bottom:14px}
 .scanVideo{width:100%;aspect-ratio:3/4;object-fit:cover;background:#000;border-radius:18px}.btn{width:100%;border:0;border-radius:14px;padding:16px;background:var(--blue);color:white;font-weight:800;font-size:17px;margin-top:10px}
 .input{width:100%;border:1px solid #cfd6df;border-radius:12px;padding:14px;font-size:16px;margin-top:10px}.muted{color:#7b8491}
@@ -882,14 +889,11 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
 </div>
 
 <nav class="nav"><div class="navIn">
-  <button class="active" data-id="home" onclick="show('home')"><span class="ico">⌂</span>Home</button>
-  <button data-id="offers" onclick="renderDemoOffers();show('offers')"><span class="ico">▣</span>Offers</button>
-  <button data-id="trips" onclick="show('trips')"><span class="ico">🚗</span>Trips</button>
-  <button data-id="earnings" onclick="show('earnings')"><span class="ico">$</span>Earnings</button>
-  <button data-id="notifications" onclick="show('notifications')"><span class="ico">♧</span>Notifications</button>
-  <button data-id="orderSummary" onclick="renderOrderSummary();show('orderSummary')"><span class="ico">☷</span>Summary</button>
-<button data-id="inventory" onclick="show('inventory')"><span class="ico">▦</span>Inventory</button>
-<button data-id="more" onclick="show('more')"><span class="ico">•••</span>More</button>
+  <button class="active" data-id="home" onclick="show('home')"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/></svg></span>Home</button>
+  <button data-id="trips" onclick="show('trips')"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 16.5h14l-1.5-6H6.5z"/><path d="M7 10.5 8.5 7h7l2 3.5"/><circle cx="7" cy="17.5" r="2"/><circle cx="17" cy="17.5" r="2"/><path d="M3.5 13h2M18.5 13h2"/></svg></span>Trips</button>
+  <button data-id="earnings" onclick="show('earnings')"><span class="ico earnIcon">$</span>Earnings</button>
+  <button data-id="notifications" onclick="show('notifications')"><span class="navBadge" aria-hidden="true"></span><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"/><path d="M9.5 21h5"/></svg></span>Notifications</button>
+  <button data-id="more" onclick="show('more')"><span class="ico moreIcon">•••</span>More</button>
 </div></nav>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
