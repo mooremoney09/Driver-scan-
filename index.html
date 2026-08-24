@@ -152,10 +152,52 @@ display:flex;align-items:center;justify-content:center;color:#657084;font-weight
 .demoItem{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:14px}
 .fakeCode{height:110px;margin-top:16px;border-radius:12px;background:#f2f4f7;display:flex;align-items:center;justify-content:center;text-align:center;color:#7b8493;font-weight:800;padding:14px}
 
+
+/* Review & Pay v11 */
+.reviewPay{background:#eef3f8;min-height:100vh;padding-bottom:110px}
+.rpTop{background:#061a31;color:white;padding:18px 16px 16px}
+.rpTitleRow{display:grid;grid-template-columns:40px 1fr 40px;align-items:center}
+.rpTitleRow h1{margin:0;text-align:center;font-size:23px}
+.rpStep{font-size:14px;text-align:center;opacity:.9;margin-top:3px}
+.rpBack{border:0;background:none;color:white;font-size:30px}
+.rpHelp{border:2px solid white;background:none;color:white;border-radius:50%;width:30px;height:30px;font-weight:900}
+.rpProgress{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:18px}
+.rpProgItem{text-align:center;font-size:10px;font-weight:800;color:#c9d3df;position:relative}
+.rpDot{width:34px;height:34px;border-radius:50%;background:#7f8b99;color:white;display:flex;align-items:center;justify-content:center;margin:0 auto 7px;font-weight:900;font-size:15px}
+.rpProgItem.done .rpDot,.rpProgItem.active .rpDot{background:#1877f2}
+.rpProgItem.active{color:#fff}.rpProgItem.done{color:#dbe8ff}
+.rpPage{padding:0 14px 18px}
+.rpCard{background:white;border-radius:16px;padding:14px;margin-top:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.storeRow{display:grid;grid-template-columns:54px 1fr auto;gap:10px;align-items:start}
+.storeIcon{width:48px;height:48px;border-radius:50%;background:#0d57c7;color:white;display:flex;align-items:center;justify-content:center;font-size:23px}
+.storeName{font-weight:900;font-size:18px}.storeAddress{color:#697386;font-size:14px;line-height:1.3;margin-top:3px}
+.orderPill{background:#eff5ff;color:#0c62c8;padding:8px 10px;border-radius:10px;text-align:right;font-size:12px;font-weight:800}
+.scanOk{margin-top:14px;background:#eaf8ef;border-radius:12px;padding:13px;display:flex;gap:10px;align-items:center}
+.scanCheck{width:38px;height:38px;border-radius:50%;background:#138a45;color:white;display:flex;align-items:center;justify-content:center;font-size:22px}
+.scanOk b{color:#138a45;font-size:16px}.scanOk span{display:block;color:#687386;font-size:14px;margin-top:2px}
+.rpSectionHead{display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:16px;margin-bottom:8px}
+.rpSectionHead span:last-child{color:#1976ed}
+.rpItem{display:grid;grid-template-columns:54px 1fr auto auto;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #edf0f4}
+.rpItem:last-child{border-bottom:0}
+.rpItemImg{width:50px;height:50px;object-fit:contain;border-radius:8px;background:#fff}
+.rpItemBlank{width:50px;height:50px;border-radius:8px;background:#eef1f4}
+.rpItemName{font-weight:800;font-size:14px;line-height:1.25}
+.rpItemSub{color:#7a8492;font-size:12px;margin-top:2px}
+.rpQty{font-size:13px;color:#333;white-space:nowrap}.rpPrice{font-weight:900;font-size:14px;white-space:nowrap}
+.payOption{border:1.5px solid #d7dce4;border-radius:11px;padding:12px;display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:10px;margin-top:9px}
+.payOption.selected{border-color:#1877f2}
+.payRadio{width:18px;height:18px;border:2px solid #1877f2;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.payRadio:after{content:"";width:8px;height:8px;background:#1877f2;border-radius:50%}
+.payName{font-weight:800}.paySub{font-size:12px;color:#7a8492;margin-top:2px}.payAmount{font-weight:900}
+.rpTotal{display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:18px}
+.rpTotal strong{color:#0a8d42;font-size:25px}
+.demoSecure{margin-top:12px;background:#eef6ff;border-radius:10px;padding:10px;color:#35638d;font-size:12px}
+.rpContinue{width:100%;border:0;border-radius:12px;background:#086bf0;color:white;padding:16px;font-size:17px;font-weight:900;margin-top:14px}
+
 </style>
 </head>
 <body>
-<div style="position:fixed;right:8px;top:8px;z-index:9999;background:#111;color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;opacity:.7">Build VERIFIED CHECKOUT v10</div>
+<div style="position:fixed;right:8px;top:8px;z-index:9999;background:#111;color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;opacity:.7">Build REVIEW PAY v11</div>
 <div class="app">
 <section id="home" class="screen active">
   <div class="mapWrap">
@@ -382,11 +424,74 @@ display:flex;align-items:center;justify-content:center;color:#657084;font-weight
   <div class="summaryBottom">
     <div class="summaryBottomIn">
       <div class="summaryTotal"><span>Order Total</span><span id="bottomTotal">$0.00</span></div>
-      <button class="summaryContinue" onclick="goToVerifiedDone()">Continue</button>
+      <button class="summaryContinue" onclick="renderReviewPay();show('reviewPay')">Continue</button>
     </div>
   </div>
 </section>
 
+
+
+<section id="reviewPay" class="screen reviewPay">
+  <div class="rpTop">
+    <div class="rpTitleRow">
+      <button class="rpBack" onclick="show('orderSummary')">‹</button>
+      <h1>REVIEW & PAY</h1>
+      <button class="rpHelp" onclick="alert('Demo review screen')">?</button>
+    </div>
+    <div class="rpStep">Step 3 of 4</div>
+
+    <div class="rpProgress">
+      <div class="rpProgItem done"><div class="rpDot">✓</div>ACCEPT ORDER</div>
+      <div class="rpProgItem done"><div class="rpDot">✓</div>SCAN ITEMS</div>
+      <div class="rpProgItem active"><div class="rpDot">3</div>REVIEW & PAY</div>
+      <div class="rpProgItem"><div class="rpDot">4</div>CHECKOUT</div>
+    </div>
+  </div>
+
+  <div class="rpPage">
+    <div class="rpCard">
+      <div class="storeRow">
+        <div class="storeIcon">🏪</div>
+        <div>
+          <div id="rpStoreName" class="storeName">Selected Store</div>
+          <div id="rpStoreAddress" class="storeAddress">Nearby store location</div>
+        </div>
+        <div class="orderPill">ORDER #<br><span id="rpOrderNo">DS-10042</span><br><span id="rpTime" style="color:#6b7280;font-weight:500"></span></div>
+      </div>
+
+      <div class="scanOk">
+        <div class="scanCheck">✓</div>
+        <div><b>All items scanned</b><span id="rpVerifiedCount">0 of 0 items verified</span></div>
+      </div>
+    </div>
+
+    <div class="rpCard">
+      <div class="rpSectionHead"><span>ITEM SUMMARY</span><span id="rpItemCount">0 items</span></div>
+      <div id="rpItems"></div>
+    </div>
+
+    <div class="rpCard">
+      <div class="rpSectionHead"><span>PAYMENT METHOD</span><span></span></div>
+      <div class="demoNotice">DEMO PAYMENT OPTIONS — no card is charged and no real payment is processed.</div>
+      <div class="payOption selected">
+        <div class="payRadio"></div>
+        <div><div class="payName">DriverScan Demo Card</div><div class="paySub">•••• 4242 • Prototype only</div></div>
+        <div id="rpPayAmount" class="payAmount">$0.00</div>
+      </div>
+      <div class="payOption" style="opacity:.75">
+        <div style="width:18px;height:18px;border:2px solid #9aa3af;border-radius:50%"></div>
+        <div><div class="payName">Apple Pay</div><div class="paySub">Not connected in this demo</div></div>
+        <div>›</div>
+      </div>
+    </div>
+
+    <div class="rpCard">
+      <div class="rpTotal"><span>ORDER TOTAL <small style="font-weight:500;color:#7a8492">(Estimated)</small></span><strong id="rpTotal">$0.00</strong></div>
+      <div class="demoSecure">🛡 Demo checkout only. No payment or retailer authorization is created.</div>
+      <button class="rpContinue" onclick="goToVerifiedDone()">PROCEED TO DEMO CHECKOUT SUMMARY ›</button>
+    </div>
+  </div>
+</section>
 
 <section id="verifiedDone" class="screen doneScreen">
   <div class="doneHero">
@@ -919,6 +1024,42 @@ function closeVerifySuccess(){
   verifyItemId=null;
 }
 
+
+
+function renderReviewPay(){
+  const ids=Object.keys(demoOrder).filter(id=>demoOrder[id]>0);
+  let total=0,qty=0;
+  const itemBox=document.getElementById('rpItems');
+  if(!itemBox) return;
+
+  itemBox.innerHTML=ids.map(id=>{
+    const item=itemById(id);
+    const q=demoOrder[id]||0;
+    if(!item) return '';
+    qty+=q;
+    total+=item.price*q;
+    const pic=item.img?`<img class="rpItemImg" src="${item.img}" alt="">`:`<div class="rpItemBlank"></div>`;
+    return `<div class="rpItem">
+      ${pic}
+      <div><div class="rpItemName">${escapeHtml(item.name)}</div><div class="rpItemSub">${money(item.price)} × ${q}</div></div>
+      <div class="rpQty">Qty: ${q}</div>
+      <div class="rpPrice">${money(item.price*q)}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('rpItemCount').textContent=qty+' items';
+  document.getElementById('rpVerifiedCount').textContent=qty+' of '+qty+' items verified';
+  document.getElementById('rpTotal').textContent=money(total);
+  document.getElementById('rpPayAmount').textContent=money(total);
+  document.getElementById('rpTime').textContent=new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+
+  try{
+    if(storeResults && storeResults.length){
+      document.getElementById('rpStoreName').textContent=storeResults[0].name||'Selected Store';
+      document.getElementById('rpStoreAddress').textContent=storeResults[0].address||'Nearby store location';
+    }
+  }catch(e){}
+}
 
 function allDemoItemsVerified(){
   const ids=Object.keys(demoOrder).filter(id=>demoOrder[id]>0);
