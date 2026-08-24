@@ -361,6 +361,33 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
 .pass16Foot{background:#eef5ff;border-radius:12px;padding:12px;margin-top:14px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
 .pass16Clock{font-size:24px;font-weight:900;color:#0f55c5}
 
+
+/* Scannable demo codes v17 */
+.pass16BarsImg{
+  width:100%;
+  height:86px;
+  object-fit:contain;
+  display:block;
+  background:#fff;
+  border-radius:8px;
+}
+.pass16QRImg{
+  width:210px;
+  height:210px;
+  object-fit:contain;
+  display:block;
+  margin:14px auto 6px;
+  background:#fff;
+  border-radius:12px;
+}
+.pass16CodeNote{
+  text-align:center;
+  font-size:11px;
+  color:#667085;
+  font-weight:800;
+  margin-top:6px;
+}
+
 </style>
 </head>
 <body>
@@ -599,7 +626,7 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
 
 
 <section id="reviewPay" class="screen reviewPay">
-<div style="display:none">Build PROTOTYPE PASS v16</div>
+<div style="display:none">Build SCANNABLE DEMO CODE v17</div>
   <div class="rpTop">
     <div class="rpTitleRow">
       <button class="rpBack" onclick="show('orderSummary')">‹</button>
@@ -719,9 +746,10 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
         <div class="pass16Stat"><b>STATUS</b><strong>Verification complete</strong><span>Prototype only</span></div>
       </div>
 
-      <div class="pass16CodeTitle">← PROTOTYPE CODE AREA →</div>
-      <div class="pass16Bars"></div>
-      <div class="pass16QR"></div>
+      <div class="pass16CodeTitle">← SCAN DEMO CODE →</div>
+      <img class="pass16BarsImg" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXAAAAAqCAIAAAAlGZdNAAABvUlEQVR4nO3UwY3kIBAFULRZOA3iIA3iIA7S8GWScBqOgz0gIWS3WrOrOr53aKktY6rK+KfxX1JKvfdSyhhj/o4xzvPsvR/H0VobY/Tez/McY9Rac85jjPu+a62llLn8450/Pz8ppeM45sV55xijtXZd19yulFJrve97jJFzrrXuu6eU5kPm8vn3vdG+vJQyl8+NjuOYHc2NUkpr+Xxs7/26rrVRSmkvftW5HjJ7n2vn3+u6Wms551Xnu819SmvUe0mPea7i9zbnnavNd0erpLnRKmlWlXNura15rjb3gXxsc03+40Dez5yv40ub8xWnlNad39t8D/lLm49Ttw5tay2ltB+wvc3V6aPNfXQfD+1v2nwM+dHRu831NtexeZS0Lj6O9/o2V0f7t/mv/iSAIAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwfwGEa2puc/CIcgAAAABJRU5ErkJggg==" alt="Demo barcode">
+      <img class="pass16QRImg" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQgAAAEIAQAAAACLjVdSAAABkElEQVR4nO2ZwY4DMQhDn6v+/y97D0CS7mVPpWjTVupkUh88iBjDyPzxefwF+CL+MeIJipVBluPWe3cK07Z4YABFBETFJHfHMO2LB4qnNwLL+ZO7U5j2IyIrLOmzPD6JeO6lJQPCeVg6eUxBPOHl6Ulh3btTmPYgcAXDv7719xSmPQjt3Aj9FPjcHcO0DRHqKcASNpKRIIR1ENMGRGSCfKyEVcW3jccURPpTuWrsutpRa6YwbUPYWWElgW2EDdKd+QGu9Ej/oUqY+/TjkZ2LXSKyBCU9yCCmbQjX4YgbG7AiUrOYdiAUgqHd6MoSoSWjmL4fES2LUzbO4qsr/bqWzxA19wgPUgGZwrSzf1ntm13q4ajDt/UvDyoSaTrqLiVkFtP3I0IoXly6Y0kGagrT/v52NTChrFfqh45J+t5My2pdV2+P+Xpoh0pPyAyZwrSxf6n5unbVrbcwF/a366OlGQ7XrvvOy4lwePUcsJddncj0fYhlzPNdA0etvXH+cdSXjAvH5b7zck7SP8nji5iJ+AFrlbrsEBa22AAAAABJRU5ErkJggg==" alt="Demo QR code">
+      <div class="pass16CodeNote">Scans to: DRIVERSCAN-DEMO-NOT-VALID-FOR-STORE-EXIT</div>
 
       <div style="text-align:center;font-size:12px;color:#667085">
         Prototype record for this order and driver only.<br>
