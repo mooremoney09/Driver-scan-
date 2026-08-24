@@ -160,11 +160,11 @@
 .verifyItemCard{margin:18px 20px 0;padding:17px;background:#fff;border:1px solid #e5e9ef;border-radius:14px;box-shadow:0 3px 12px rgba(0,0,0,.08);display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
 .verifyItemLabel{grid-column:1/-1;color:#667085;font-size:14px}.verifyItemName{font-weight:850;font-size:17px;line-height:1.25}.verifyItemStatus{color:#16a34a;font-weight:800;white-space:nowrap}
 .verifyMsg{margin:14px 20px 0;padding:10px 12px;border-radius:10px;background:#f3f6fa;color:#334155;font-size:13px;font-weight:700}
-.verifyRetry{margin:10px 20px 0;width:calc(100% - 40px)}
 .deliverySliderWrap{position:relative;margin:24px 20px 0;height:62px;border-radius:999px;background:#17469d;color:#fff;overflow:hidden}
-.deliverySliderLabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:850;pointer-events:none}
-.deliverySlider{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:.001;cursor:pointer;z-index:2}
-.deliveryKnob{position:absolute;left:4px;top:4px;width:54px;height:54px;border-radius:50%;background:#3578f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;transition:left .08s;pointer-events:none;z-index:1}
+.deliverySliderFill{position:absolute;left:0;top:0;bottom:0;width:0;background:#2465ee;transition:width .08s;pointer-events:none;z-index:0}
+.deliverySliderLabel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:850;pointer-events:none;z-index:1}
+.deliverySlider{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:.001;cursor:pointer;z-index:3;touch-action:none}
+.deliveryKnob{position:absolute;left:4px;top:4px;width:54px;height:54px;border-radius:50%;background:#3578f6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;transition:left .08s;pointer-events:none;z-index:2}
 .deliverySliderWrap.disabled{opacity:.45}.deliverySliderWrap.disabled .deliverySlider{pointer-events:none}
 
 
@@ -910,8 +910,8 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
         <div id="verifyItemStatus" class="verifyItemStatus">Waiting</div>
       </div>
       <div id="verifyMsg" class="verifyMsg">Starting camera…</div>
-      <button class="btn verifyRetry" onclick="startItemScanner()">Restart Scanner</button>
       <div id="deliverySliderWrap" class="deliverySliderWrap disabled">
+        <div id="deliverySliderFill" class="deliverySliderFill"></div>
         <div class="deliverySliderLabel">START DELIVERY</div>
         <div id="deliveryKnob" class="deliveryKnob">»</div>
         <input id="deliverySlider" class="deliverySlider" type="range" min="0" max="100" value="0" aria-label="Slide to start delivery">
@@ -1303,6 +1303,7 @@ function openItemScanner(id){
   const slider=document.getElementById('deliverySlider');
   slider.value=0;
   document.getElementById('deliveryKnob').style.left='4px';
+  document.getElementById('deliverySliderFill').style.width='0';
   document.getElementById('deliverySliderWrap').classList.add('disabled');
   const msg=document.getElementById('verifyMsg');
   msg.classList.remove('verifyWrong');
@@ -1374,6 +1375,7 @@ deliverySlider.addEventListener('input',()=>{
   const knob=document.getElementById('deliveryKnob');
   const travel=Math.max(0,wrap.clientWidth-62);
   knob.style.left=(4+travel*value/100)+'px';
+  document.getElementById('deliverySliderFill').style.width=value+'%';
 });
 deliverySlider.addEventListener('change',()=>{
   if(Number(deliverySlider.value)>=92){
@@ -1383,6 +1385,7 @@ deliverySlider.addEventListener('change',()=>{
   }else{
     deliverySlider.value=0;
     document.getElementById('deliveryKnob').style.left='4px';
+    document.getElementById('deliverySliderFill').style.width='0';
   }
 });
 
