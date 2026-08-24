@@ -388,6 +388,23 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
   margin-top:6px;
 }
 
+
+/* Polished verification pass v18 */
+.pass16Card{border:2px solid #082c64;box-shadow:0 8px 28px rgba(5,35,80,.14)}
+.pass16Head{background:linear-gradient(180deg,#0c3e86,#082f69);padding:20px}
+.pass16Body{padding:18px 20px 24px}
+.pass16CodeTitle{font-size:15px;letter-spacing:.2px}
+.pass16BarsImg{height:82px;margin:6px 0 14px}
+.pass16QRWrap{width:224px;height:224px;margin:12px auto;position:relative;background:#fff}
+.pass16QRWrap .pass16QRImg{width:224px;height:224px;margin:0;display:block}
+.pass16Spark{
+ position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+ width:62px;height:62px;object-fit:contain;background:#fff;border-radius:10px;
+ padding:5px;box-sizing:border-box;
+}
+.pass16Foot{border:1px solid #dce9fb}
+.pass16Items{margin-top:18px}
+
 </style>
 </head>
 <body>
@@ -587,7 +604,7 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
     </div>
 
     <div class="card" style="background:#fff7d6;border-color:#f1d56b">
-      <b>Prototype only</b>
+      <b>DriverScan only</b>
       <p class="muted" style="margin-bottom:0">
         Demo Override is for app testing only. It does not validate a mismatched barcode or create a real retailer/store approval.
       </p>
@@ -626,7 +643,7 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
 
 
 <section id="reviewPay" class="screen reviewPay">
-<div style="display:none">Build SCANNABLE DEMO CODE v17</div>
+<div style="display:none">Build POLISHED PASS v18</div>
   <div class="rpTop">
     <div class="rpTitleRow">
       <button class="rpBack" onclick="show('orderSummary')">‹</button>
@@ -716,10 +733,10 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
   <div class="pass16Card">
     <div class="pass16Head">
       <h1>DriverScan Order Verification</h1>
-      <p>Prototype summary</p>
+      <p>Order verification summary</p>
     </div>
     <div class="pass16Body">
-      <div class="pass16Proto">Prototype — not retailer-issued</div>
+      <div class="pass16Proto">DriverScan verification • Not retailer-issued</div>
 
       <div class="pass16Top">
         <div class="pass16Box">
@@ -742,22 +759,25 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
 
       <div class="pass16Stats">
         <div class="pass16Stat"><b>ITEMS VERIFIED</b><strong id="p16Verified">12 of 12</strong><span>All items scanned</span></div>
-        <div class="pass16Stat"><b>PAYMENT</b><strong>Prototype complete</strong><span>DriverScan Card •••• 4242</span></div>
-        <div class="pass16Stat"><b>STATUS</b><strong>Verification complete</strong><span>Prototype only</span></div>
+        <div class="pass16Stat"><b>PAYMENT</b><strong>Verification complete</strong><span>DriverScan Card •••• 4242</span></div>
+        <div class="pass16Stat"><b>STATUS</b><strong>Verification complete</strong><span>DriverScan only</span></div>
       </div>
 
-      <div class="pass16CodeTitle">← SCAN DEMO CODE →</div>
+      <div class="pass16CodeTitle">← SCAN VERIFICATION CODE →</div>
       <img class="pass16BarsImg" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXAAAAAqCAIAAAAlGZdNAAABvUlEQVR4nO3UwY3kIBAFULRZOA3iIA3iIA7S8GWScBqOgz0gIWS3WrOrOr53aKktY6rK+KfxX1JKvfdSyhhj/o4xzvPsvR/H0VobY/Tez/McY9Rac85jjPu+a62llLn8450/Pz8ppeM45sV55xijtXZd19yulFJrve97jJFzrrXuu6eU5kPm8vn3vdG+vJQyl8+NjuOYHc2NUkpr+Xxs7/26rrVRSmkvftW5HjJ7n2vn3+u6Wms551Xnu819SmvUe0mPea7i9zbnnavNd0erpLnRKmlWlXNura15rjb3gXxsc03+40Dez5yv40ub8xWnlNad39t8D/lLm49Ttw5tay2ltB+wvc3V6aPNfXQfD+1v2nwM+dHRu831NtexeZS0Lj6O9/o2V0f7t/mv/iSAIAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwAgUII1CAMAIFCCNQgDACBQgjUIAwfwGEa2puc/CIcgAAAABJRU5ErkJggg==" alt="Demo barcode">
-      <img class="pass16QRImg" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQgAAAEIAQAAAACLjVdSAAABkElEQVR4nO2ZwY4DMQhDn6v+/y97D0CS7mVPpWjTVupkUh88iBjDyPzxefwF+CL+MeIJipVBluPWe3cK07Z4YABFBETFJHfHMO2LB4qnNwLL+ZO7U5j2IyIrLOmzPD6JeO6lJQPCeVg6eUxBPOHl6Ulh3btTmPYgcAXDv7719xSmPQjt3Aj9FPjcHcO0DRHqKcASNpKRIIR1ENMGRGSCfKyEVcW3jccURPpTuWrsutpRa6YwbUPYWWElgW2EDdKd+QGu9Ej/oUqY+/TjkZ2LXSKyBCU9yCCmbQjX4YgbG7AiUrOYdiAUgqHd6MoSoSWjmL4fES2LUzbO4qsr/bqWzxA19wgPUgGZwrSzf1ntm13q4ajDt/UvDyoSaTrqLiVkFtP3I0IoXly6Y0kGagrT/v52NTChrFfqh45J+t5My2pdV2+P+Xpoh0pPyAyZwrSxf6n5unbVrbcwF/a366OlGQ7XrvvOy4lwePUcsJddncj0fYhlzPNdA0etvXH+cdSXjAvH5b7zck7SP8nji5iJ+AFrlbrsEBa22AAAAABJRU5ErkJggg==" alt="Demo QR code">
-      <div class="pass16CodeNote">Scans to: DRIVERSCAN-DEMO-NOT-VALID-FOR-STORE-EXIT</div>
+      <div class="pass16QRWrap">
+        <img class="pass16QRImg" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQgAAAEIAQAAAACLjVdSAAABkElEQVR4nO2ZwY4DMQhDn6v+/y97D0CS7mVPpWjTVupkUh88iBjDyPzxefwF+CL+MeIJipVBluPWe3cK07Z4YABFBETFJHfHMO2LB4qnNwLL+ZO7U5j2IyIrLOmzPD6JeO6lJQPCeVg6eUxBPOHl6Ulh3btTmPYgcAXDv7719xSmPQjt3Aj9FPjcHcO0DRHqKcASNpKRIIR1ENMGRGSCfKyEVcW3jccURPpTuWrsutpRa6YwbUPYWWElgW2EDdKd+QGu9Ej/oUqY+/TjkZ2LXSKyBCU9yCCmbQjX4YgbG7AiUrOYdiAUgqHd6MoSoSWjmL4fES2LUzbO4qsr/bqWzxA19wgPUgGZwrSzf1ntm13q4ajDt/UvDyoSaTrqLiVkFtP3I0IoXly6Y0kGagrT/v52NTChrFfqh45J+t5My2pdV2+P+Xpoh0pPyAyZwrSxf6n5unbVrbcwF/a366OlGQ7XrvvOy4lwePUcsJddncj0fYhlzPNdA0etvXH+cdSXjAvH5b7zck7SP8nji5iJ+AFrlbrsEBa22AAAAABJRU5ErkJggg==" alt="Demo QR code">
+        <img class="pass16Spark" src="data:image/jpeg;base64,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" alt="">
+      </div>
+      <div class="pass16CodeNote">DriverScan verification code</div>
 
       <div style="text-align:center;font-size:12px;color:#667085">
-        Prototype record for this order and driver only.<br>
-        Do not use as proof of payment or store authorization.
+        DriverScan verification record for this order only.<br>
+        Not a retailer payment or exit authorization.
       </div>
 
       <div class="pass16Foot">
-        <div><b>This prototype summary expires in 30 minutes.</b><br><span style="color:#667085;font-size:12px">Thank you for delivering great service!</span></div>
+        <div><b>This verification summary expires in 30 minutes.</b><br><span style="color:#667085;font-size:12px">Thank you for delivering great service!</span></div>
         <div id="p16Countdown" class="pass16Clock">30:00</div>
       </div>
 
@@ -778,7 +798,7 @@ linear-gradient(#111 12px,transparent 12px) 0 0/32px 32px,
       <p>Order summary</p>
     </div>
     <div class="demoPassBody">
-      <div class="passPrototype">Prototype — not retailer-issued</div>
+      <div class="passPrototype">DriverScan verification • Not retailer-issued</div>
       <div class="demoGrid">
         <div class="demoBox"><b>TIME</b><span id="demoPassTime">—</span></div>
         <div class="demoBox"><b>STORE</b><span id="demoPassStore">Selected nearby store</span></div>
