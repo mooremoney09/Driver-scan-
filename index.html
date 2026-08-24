@@ -453,7 +453,8 @@ html,body{
   <div class="summaryBottom">
     <div class="summaryBottomIn">
       <div class="summaryTotal"><span>Order Total</span><span id="bottomTotal">$0.00</span></div>
-      <button class="summaryContinue" onclick="renderReviewPay();show('reviewPay')">Continue</button>
+      <button class="summaryContinue" onclick="renderReviewPay();show('reviewPay')">Continue to Review & Pay</button>
+      <button class="summaryContinue" style="margin-top:10px;background:#fff;color:#19458b;border:2px solid #19458b" onclick="renderOrderSummary();show('orderSummary')">View Order Summary</button>
     </div>
   </div>
 </section>
@@ -461,7 +462,7 @@ html,body{
 
 
 <section id="reviewPay" class="screen reviewPay">
-<div style="display:none">Build REVIEW PAY v13</div>
+<div style="display:none">Build ORDER LINKS v14</div>
   <div class="rpTop">
     <div class="rpTitleRow">
       <button class="rpBack" onclick="show('orderSummary')">‹</button>
@@ -491,7 +492,11 @@ html,body{
 
       <div class="scanOk">
         <div class="scanCheck">✓</div>
-        <div><b>All items scanned</b><span id="rpVerifiedCount">0 of 0 items verified</span></div>
+        <div style="flex:1">
+          <b>All items scanned</b>
+          <span id="rpVerifiedCount">0 of 0 items verified</span>
+          <button onclick="renderOrderSummary();show('orderSummary')" style="margin-top:8px;border:0;background:none;color:#0b63ce;font-weight:800;padding:0">View Order Summary ›</button>
+        </div>
       </div>
     </div>
 
@@ -560,7 +565,8 @@ html,body{
         <div id="demoPassItems"></div>
       </div>
       <div class="fakeCode">DEMO CODE AREA<br>NON-SCANNABLE</div>
-      <button class="btn" onclick="show('home')">Return Home</button>
+      <button class="btn" onclick="renderOrderSummary();show('orderSummary')">View Order Summary</button>
+      <button class="btn" style="background:#29445f" onclick="show('home')">Return Home</button>
     </div>
   </div>
 </section>
