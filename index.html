@@ -55,10 +55,47 @@
 .summaryBottomIn{max-width:520px;margin:auto;background:#fff;border-top:1px solid #ddd;padding:10px 14px}
 .summaryTotal{display:flex;justify-content:space-between;align-items:center;font-size:18px;font-weight:900;margin-bottom:8px}
 
+
+/* Order Summary v6 - screenshot style */
+#orderSummary{background:#f6f7f9;min-height:100vh}
+.summaryHead{background:#19458b;color:#fff;padding:14px 14px 12px;position:sticky;top:0;z-index:60}
+.summaryHead .bar{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px}
+.summaryHead h1{font-size:20px;margin:0;text-align:center;font-weight:800}
+.summaryClose{width:38px;height:38px;border:0;background:transparent;color:#fff;font-size:28px;line-height:1}
+.summaryQtyPill{font-size:12px;font-weight:800;background:rgba(255,255,255,.12);padding:8px 10px;border-radius:7px;white-space:nowrap}
+.summaryMeta{background:#fff;padding:14px 18px 12px;border-bottom:1px solid #e5e7eb}
+.summaryMeta b{font-size:21px}
+.summaryMeta .est{font-size:14px;color:#566273;margin-top:4px}
+.orderList{padding:8px 12px 130px;background:#f6f7f9}
+.orderRow{background:#fff;border-radius:12px;padding:14px 12px;margin:10px 0;display:grid;grid-template-columns:88px minmax(0,1fr);gap:12px;border:1px solid #edf0f3}
+.orderPic{width:88px;height:88px;border-radius:8px;background:#fff;object-fit:contain}
+.orderPicBlank{width:88px;height:88px;border-radius:8px;background:#f1f3f6;display:flex;align-items:center;justify-content:center;text-align:center;color:#8993a1;font-size:11px;padding:8px}
+.orderName{font-weight:800;line-height:1.28;font-size:16px}
+.orderPrice{font-size:15px;font-weight:800;margin-top:4px}
+.orderSub{color:#8a94a3;font-size:12px;margin-top:2px}
+.orderControls{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px;margin-top:12px}
+.qtyBox{display:inline-flex;align-items:center;gap:8px;background:#fafafa;border-radius:9px;padding:2px}
+.qtyBtn{width:34px;height:34px;border:0;border-radius:7px;background:#f3f4f6;font-size:22px;color:#1f2937}
+.qtyNum{min-width:22px;text-align:center;font-weight:800}
+.stockBtn{justify-self:end;border:1px solid #f0b5be;background:#fff7f8;color:#c11c32;border-radius:999px;padding:8px 12px;font-weight:800;font-size:13px;white-space:nowrap}
+.stockBtn.active{background:#fff0f3;border-color:#e5909f}
+.recBox{grid-column:1/-1;background:#fff9e8;border:1px solid #f1dc92;border-radius:10px;padding:10px;margin-top:6px}
+.recTitle{font-size:11px;font-weight:900;color:#8a6900;margin-bottom:6px;letter-spacing:.25px}
+.recItem{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:9px;padding:8px 0;border-top:1px solid #f0e6bd}
+.recItem:first-of-type{border-top:0}
+.recMini{width:44px;height:44px;object-fit:contain;background:#fff;border-radius:7px}
+.recBlank{width:44px;height:44px;background:#eef0f3;border-radius:7px}
+.recText{font-size:12px;font-weight:700;line-height:1.25}
+.recAdd{border:0;background:#176ff2;color:#fff;border-radius:8px;padding:8px 10px;font-weight:800}
+.summaryBottom{position:fixed;bottom:76px;left:0;right:0;z-index:85}
+.summaryBottomIn{max-width:520px;margin:auto;background:#fff;border-top:1px solid #e5e7eb;padding:10px 12px 12px}
+.summaryTotal{display:flex;justify-content:space-between;align-items:center;font-size:17px;font-weight:900;margin-bottom:7px}
+.summaryContinue{width:100%;border:0;border-radius:26px;padding:15px;background:#19458b;color:#fff;font-size:18px;font-weight:800}
+
 </style>
 </head>
 <body>
-<div style="position:fixed;right:8px;top:8px;z-index:9999;background:#111;color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;opacity:.7">Build ORDER SUMMARY v5</div>
+<div style="position:fixed;right:8px;top:8px;z-index:9999;background:#111;color:#fff;padding:4px 7px;border-radius:7px;font-size:10px;opacity:.7">Build ORDER SUMMARY v6</div>
 <div class="app">
 <section id="home" class="screen active">
   <div class="mapWrap">
@@ -264,24 +301,28 @@
 </section>
 
 
+
 <section id="orderSummary" class="screen">
   <div class="summaryHead">
     <div class="bar">
-      <button onclick="show('inventory')" style="border:0;background:none;color:white;font-size:28px">‹</button>
+      <button class="summaryClose" onclick="show('inventory')">×</button>
       <h1>Order Summary</h1>
-      <div id="orderQtyBadge" style="font-size:13px;font-weight:800">Order Qty 0</div>
+      <div id="orderQtyBadge" class="summaryQtyPill">Order Qty 0</div>
     </div>
   </div>
+
   <div class="summaryMeta">
     <b id="summaryCount">0 Miscellaneous</b>
     <div class="est">Est. Total: <strong id="summaryEst">$0.00</strong></div>
-    <div style="font-size:11px;color:#8b94a3;margin-top:5px">Demo inventory controls — stock status is for prototype testing only.</div>
+    <div style="font-size:11px;color:#8a94a3;margin-top:4px">Prototype inventory summary</div>
   </div>
+
   <div id="orderList" class="orderList"></div>
+
   <div class="summaryBottom">
     <div class="summaryBottomIn">
       <div class="summaryTotal"><span>Order Total</span><span id="bottomTotal">$0.00</span></div>
-      <button class="btn" onclick="alert('Demo order saved for testing.')">Continue</button>
+      <button class="summaryContinue" onclick="alert('Demo order saved for testing.')">Continue</button>
     </div>
   </div>
 </section>
@@ -583,39 +624,60 @@ function orderImage(item,cls='orderPic'){
 function renderOrderSummary(){
   const box=document.getElementById('orderList');
   if(!box) return;
+
   const ids=Object.keys(demoOrder).filter(id=>demoOrder[id]>0);
   let total=0, qty=0;
+
   box.innerHTML=ids.map(id=>{
-    const item=itemById(id); const q=demoOrder[id]; qty+=q;
+    const item=itemById(id);
+    if(!item) return '';
+    const q=demoOrder[id];
+    qty+=q;
     if(!demoOut[id]) total+=item.price*q;
+
     const recs=demoOut[id]?recommendationIds(id):[];
+
     return `
-    <div class="orderRow">
-      ${orderImage(item)}
-      <div>
-        <div class="orderName">${escapeHtml(item.name)}</div>
-        <div class="orderPrice">${money(item.price)}</div>
-        <div class="orderSub">${demoOut[id]?'Unavailable in demo order':money(item.price)+' × '+q}</div>
-        <div class="orderControls">
-          <div class="qtyBox">
-            <button class="qtyBtn" onclick="changeQty('${id}',-1)">−</button>
-            <span class="qtyNum">${q}</span>
-            <button class="qtyBtn" onclick="changeQty('${id}',1)">+</button>
+      <div class="orderRow">
+        ${orderImage(item)}
+        <div>
+          <div class="orderName">${escapeHtml(item.name)}</div>
+          <div class="orderPrice">${money(item.price)}</div>
+          <div class="orderSub">${demoOut[id]?'Unavailable in demo order':money(item.price)+' × '+q}</div>
+
+          <div class="orderControls">
+            <div class="qtyBox">
+              <button class="qtyBtn" onclick="changeQty('${id}',-1)">−</button>
+              <span class="qtyNum">${q}</span>
+              <button class="qtyBtn" onclick="changeQty('${id}',1)">+</button>
+            </div>
+
+            <button class="stockBtn ${demoOut[id]?'active':''}" onclick="toggleOut('${id}')">
+              ${demoOut[id]?'✓ Out of Stock':'Out of Stock'}
+            </button>
           </div>
-          <button class="stockBtn ${demoOut[id]?'active':''}" onclick="toggleOut('${id}')">${demoOut[id]?'✓ Out of Stock':'Mark Out of Stock'}</button>
         </div>
-      </div>
-      ${demoOut[id]?`
-      <div class="recBox">
-        <div class="recTitle">RECOMMENDED FROM YOUR DEMO INVENTORY</div>
-        ${recs.map(rid=>{
-          const r=itemById(rid);
-          return `<div class="recItem">${orderImage(r,'recMini')}<div class="recText">${escapeHtml(r.name)}<br><span style="color:#667085">${money(r.price)}</span></div><button class="recAdd" onclick="addRecommended('${rid}')">Add</button></div>`;
-        }).join('')}
-      </div>`:''}
-    </div>`;
+
+        ${demoOut[id]?`
+          <div class="recBox">
+            <div class="recTitle">RECOMMENDED FROM YOUR INVENTORY</div>
+            ${recs.map(rid=>{
+              const r=itemById(rid);
+              return `
+                <div class="recItem">
+                  ${orderImage(r,'recMini')}
+                  <div class="recText">${escapeHtml(r.name)}<br><span style="color:#697386">${money(r.price)}</span></div>
+                  <button class="recAdd" onclick="addRecommended('${rid}')">Add</button>
+                </div>`;
+            }).join('')}
+          </div>`:''}
+      </div>`;
   }).join('');
-  if(!ids.length) box.innerHTML='<div class="card">No items in the demo order.</div>';
+
+  if(!ids.length){
+    box.innerHTML='<div class="card">No items in the demo order.</div>';
+  }
+
   document.getElementById('orderQtyBadge').textContent='Order Qty '+qty;
   document.getElementById('summaryCount').textContent=ids.length+' Miscellaneous';
   document.getElementById('summaryEst').textContent=money(total);
