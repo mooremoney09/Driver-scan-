@@ -169,6 +169,8 @@
 .continueScanBtn{display:block;width:calc(100% - 40px);margin:24px 20px 0;border:0;border-radius:999px;padding:18px;background:#17469d;color:#fff;font-size:19px;font-weight:900;letter-spacing:.3px;box-shadow:0 3px 10px rgba(23,70,157,.22)}
 .continueScanBtn:disabled{background:#9fb3d8;color:rgba(255,255,255,.9);box-shadow:none}
 .continueScanBtn:not(:disabled):active{transform:scale(.99);background:#103d8e}
+.summaryContinue:disabled{background:#9fb3d8;color:rgba(255,255,255,.92);box-shadow:none}
+.scanCountPill{display:inline-flex;align-items:center;justify-content:center;margin-top:8px;padding:6px 11px;border-radius:999px;background:#eaf2ff;color:#1457b8;font-size:13px;font-weight:900}
 
 
 /* Verified checkout demo flow v10 */
@@ -723,7 +725,7 @@ body.deliveryLocked .app{padding-bottom:0}
   <div class="summaryBottom">
     <div class="summaryBottomIn">
       <div class="summaryTotal"><span>Order Total</span><span id="bottomTotal">$0.00</span></div>
-      <button class="summaryContinue" onclick="renderReviewPay();show('reviewPay')">Continue to Review & Pay</button>
+      <button id="summaryContinue" class="summaryContinue" onclick="continueToReviewPayAfterScans()" disabled>Scan every item twice to continue</button>
     </div>
   </div>
 </section>
@@ -991,18 +993,26 @@ body.deliveryLocked .app{padding-bottom:0}
       <div class="verifyCamera">
         <video id="verifyVideo" class="verifyVideo" playsinline muted></video>
         <div class="verifyFrame"></div>
-        <div id="verifyToast" class="verifyToast"><strong>✓ Correct barcode</strong><span>Item verified</span></div>
+        <div id="verifyToast" class="verifyToast"><strong id="verifyToastTitle">✓ Correct barcode</strong><span id="verifyToastText">Item verified</span></div>
         <div class="verifyHint">Center the barcode inside the box</div>
       </div>
       <div class="verifyInfo">Scan instructions&nbsp; ⓘ</div>
       <div class="verifyItemCard">
         <div class="verifyItemLabel">Order item</div>
         <div id="verifyItemName" class="verifyItemName"></div>
-        <div id="verifyItemStatus" class="verifyItemStatus">Waiting</div>
+        <div><div id="verifyItemStatus" class="verifyItemStatus">Scanned 0/2</div><div id="verifyScanCount" class="scanCountPill">0 of 2 scans</div></div>
       </div>
       <div id="verifyMsg" class="verifyMsg">Starting camera…</div>
       <button id="continueScanBtn" class="continueScanBtn" type="button" disabled onclick="continueAfterScan()">CONTINUE</button>
     </div>
+  </div>
+</div>
+
+<div id="verifySuccess" class="verifySuccess" aria-live="assertive">
+  <div class="verifySuccessInner">
+    <div class="verifyCheck">✓</div>
+    <h1>Correct item</h1>
+    <p id="verifySuccessItem">Item scanned twice</p>
   </div>
 </div>
 
@@ -1326,6 +1336,7 @@ let demoOrder={ps5:1,switch:1,xbox:1,watch:1,macbook:1};
 let demoOut={};
 let demoQuality={};
 let demoScanned={};
+let demoScanCounts={};
 let replacingItemId=null;
 
 function money(v){return '$'+Number(v).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
@@ -1419,13 +1430,22 @@ function chooseReplacement(newId){
 
 let verifyReader=null;
 let verifyItemId=null;
+let verifyTransitionTimer=null;
+let verifyScanProcessing=false;
 
 function openItemScanner(id){
   verifyItemId=id;
   const item=itemById(id);
   if(!item) return;
+  if(demoScanned[id]){
+    demoScanned[id]=false;
+    demoScanCounts[id]=0;
+  }
+  verifyScanProcessing=false;
+  clearTimeout(verifyTransitionTimer);
+  const count=demoScanCounts[id]||0;
   document.getElementById('verifyItemName').textContent=item.name;
-  document.getElementById('verifyItemStatus').textContent='Waiting';
+  updateVerifyScanProgress(count);
   document.getElementById('verifyToast').classList.remove('show');
   document.getElementById('continueScanBtn').disabled=true;
   const msg=document.getElementById('verifyMsg');
@@ -1471,11 +1491,77 @@ async function startItemScanner(){
 }
 
 function markScannerSuccess(){
-  if(verifyItemId)demoScanned[verifyItemId]=true;
-  document.getElementById('verifyToast').classList.add('show');
-  document.getElementById('verifyItemStatus').textContent='Scanned 1/1';
-  document.getElementById('verifyMsg').textContent='Correct barcode. Tap Continue to go to the next page.';
-  document.getElementById('continueScanBtn').disabled=false;
+  if(!verifyItemId||verifyScanProcessing)return;
+  verifyScanProcessing=true;
+  const count=Math.min(2,(demoScanCounts[verifyItemId]||0)+1);
+  demoScanCounts[verifyItemId]=count;
+  updateVerifyScanProgress(count);
+
+  const toast=document.getElementById('verifyToast');
+  document.getElementById('verifyToastTitle').textContent='✓ Correct barcode';
+  document.getElementById('verifyToastText').textContent=count===1?'First scan complete — scan this item again':'Second scan complete';
+  toast.classList.add('show');
+
+  if(count===1){
+    document.getElementById('verifyMsg').textContent='Correct first scan. Hold steady, then scan the same item one more time.';
+    verifyTransitionTimer=setTimeout(()=>{
+      toast.classList.remove('show');
+      verifyScanProcessing=false;
+      startItemScanner();
+    },900);
+    return;
+  }
+
+  document.getElementById('verifyMsg').textContent='Checking item…';
+  verifyTransitionTimer=setTimeout(()=>{
+    const completedId=verifyItemId;
+    const completedItem=itemById(completedId);
+    demoScanned[completedId]=true;
+    closeItemScanner();
+    document.getElementById('verifySuccessItem').textContent=(completedItem?.name||'Item')+' scanned twice';
+    document.getElementById('verifySuccess').classList.add('open');
+    renderOrderSummary();
+    verifyTransitionTimer=setTimeout(()=>advanceAfterVerifiedItem(completedId),1200);
+  },2000);
+}
+
+function updateVerifyScanProgress(count){
+  const safe=Math.max(0,Math.min(2,Number(count)||0));
+  document.getElementById('verifyItemStatus').textContent='Scanned '+safe+'/2';
+  document.getElementById('verifyScanCount').textContent=safe+' of 2 scans';
+}
+
+function requiredItemIds(){
+  return Object.keys(demoOrder).filter(id=>demoOrder[id]>0&&!demoOut[id]);
+}
+
+function allItemsScannedTwice(){
+  const ids=requiredItemIds();
+  return ids.length>0&&ids.every(id=>demoScanned[id]&&(demoScanCounts[id]||0)>=2);
+}
+
+function advanceAfterVerifiedItem(completedId){
+  document.getElementById('verifySuccess').classList.remove('open');
+  verifyScanProcessing=false;
+  verifyItemId=null;
+  const nextId=requiredItemIds().find(id=>!demoScanned[id]||(demoScanCounts[id]||0)<2);
+  if(nextId){
+    show('orderSummary');
+    openItemScanner(nextId);
+    return;
+  }
+  renderReviewPay();
+  show('reviewPay');
+}
+
+function continueToReviewPayAfterScans(){
+  if(!allItemsScannedTwice()){
+    const nextId=requiredItemIds().find(id=>!demoScanned[id]||(demoScanCounts[id]||0)<2);
+    if(nextId)openItemScanner(nextId);
+    return;
+  }
+  renderReviewPay();
+  show('reviewPay');
 }
 
 function closeItemScanner(hide=true){
@@ -1722,7 +1808,7 @@ function renderOrderSummary(){
           <div class="orderPrice">${money(item.price)}</div>
           <div class="orderSub">${demoOut[id]?'Unavailable in demo order':money(item.price)+' × '+q}</div>
           <div class="itemChecks">
-            <span class="itemCheck ${demoScanned[id]?'done':''}">${demoScanned[id]?'✓ Barcode scanned':'Barcode waiting'}</span>
+            <span class="itemCheck ${demoScanned[id]?'done':''}">${demoScanned[id]?'✓ Scanned 2/2':'Barcode scans '+(demoScanCounts[id]||0)+'/2'}</span>
             <span class="itemCheck ${demoQuality[id]?'done':''}">${demoQuality[id]?'✓ Quality checked':'Quality check needed'}</span>
           </div>
 
@@ -1734,7 +1820,7 @@ function renderOrderSummary(){
             </div>
 
             <div class="itemActionRow">
-              <button class="scanItemBtn" onclick="openItemScanner('${id}')">${demoScanned[id]?'Scan Again':'Scan'}</button>
+              <button class="scanItemBtn" onclick="openItemScanner('${id}')">${demoScanned[id]?'Scan Again':(demoScanCounts[id]||0)===1?'Scan Second Time':'Scan'}</button>
               <button class="qualityBtn ${demoQuality[id]?'checked':''}" onclick="toggleQuality('${id}')">${demoQuality[id]?'✓ Quality Checked':'Quality Check'}</button>
               <button class="stockBtn ${demoOut[id]?'active':''}" onclick="toggleOut('${id}')">
                 ${demoOut[id]?'✓ Out of Stock':'Out of Stock'}
@@ -1767,6 +1853,12 @@ function renderOrderSummary(){
   document.getElementById('summaryCount').textContent=ids.length+' Miscellaneous';
   document.getElementById('summaryEst').textContent=money(total);
   document.getElementById('bottomTotal').textContent=money(total);
+  const continueButton=document.getElementById('summaryContinue');
+  if(continueButton){
+    const ready=allItemsScannedTwice();
+    continueButton.disabled=!ready;
+    continueButton.textContent=ready?'Continue to Review & Pay':'Scan every item twice to continue';
+  }
 }
 
 window.addEventListener('load',()=>{initMap();renderOrderSummary();});
