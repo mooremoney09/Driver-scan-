@@ -464,6 +464,9 @@ body.deliveryLocked .nav{display:none}
 body.deliveryLocked .app{padding-bottom:0}
 .startDeliveryBtn{display:block;width:100%;margin-top:18px;border:0;border-radius:999px;padding:18px;background:#194f9d;color:#fff;font-size:19px;font-weight:900;letter-spacing:.5px;touch-action:manipulation}
 .startDeliveryBtn:active{transform:scale(.99);background:#123f82}
+.passSummaryBtn{display:block!important;visibility:visible!important;width:100%;margin-top:18px;border:2px solid #1f5baa;border-radius:999px;padding:16px;background:#fff;color:#1f5baa;font-size:18px;font-weight:900;letter-spacing:.2px;touch-action:manipulation}
+.passSummaryBtn:active{transform:scale(.99);background:#eef5ff}
+#p16Items{display:none!important}
 .deliveryTrip{background:#f3f4f6;min-height:100vh;padding-bottom:110px}
 .deliveryTripHead{background:#244a91;color:#fff;padding:20px 18px;text-align:center;font-size:20px;font-weight:900;position:sticky;top:0;z-index:50}
 .deliveryTimeline{position:relative;padding:18px 18px 124px 64px}.deliveryTimeline:before{content:"";position:absolute;left:39px;top:42px;bottom:145px;border-left:2px dashed #c6ccd5}
@@ -846,10 +849,8 @@ body.deliveryLocked .app{padding-bottom:0}
         <div id="p16Countdown" class="pass16Clock">30:00</div>
       </div>
 
-      <div class="pass16Items">
-        <b>ITEMS</b>
-        <div id="p16Items"></div>
-      </div>
+      <div id="p16Items" hidden></div>
+      <button id="passViewSummaryBtn" class="passSummaryBtn" type="button" onclick="openReadOnlyOrderSummary('prototypePass16')">View Order Summary</button>
 
       <button id="startDeliveryBtn" class="startDeliveryBtn" type="button" onclick="startDeliveryTrip()">START DELIVERY</button>
     </div>
@@ -1548,6 +1549,7 @@ function startDemoCheckoutWait(){
 
 
 let p16Timer=null;
+let readOnlySummaryReturnScreen='reviewPay';
 function openPrototypePass16(){
   const ids=Object.keys(demoOrder).filter(id=>demoOrder[id]>0);
   let total=0,qty=0;
@@ -1624,7 +1626,12 @@ function buildDemoPass(){
   }
 }
 
-function openReadOnlyOrderSummary(){
+function openReadOnlyOrderSummary(returnScreen='reviewPay'){
+  readOnlySummaryReturnScreen=returnScreen;
+  const returnButton=document.getElementById('readOnlyContinue');
+  if(returnButton){
+    returnButton.textContent=returnScreen==='prototypePass16'?'RETURN TO EXIT PASS':'RETURN TO REVIEW & PAY';
+  }
   const ids=Object.keys(demoOrder).filter(id=>demoOrder[id]>0 && !demoOut[id]);
   let total=0,qty=0;
   const box=document.getElementById('readOnlyItems');
@@ -1647,6 +1654,10 @@ function openReadOnlyOrderSummary(){
 }
 
 function continueFromReadOnlySummary(){
+  if(readOnlySummaryReturnScreen==='prototypePass16'){
+    show('prototypePass16');
+    return;
+  }
   renderReviewPay();
   show('reviewPay');
 }
